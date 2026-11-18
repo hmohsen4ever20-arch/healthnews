@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Health Plus</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #06110e;
+      --surface: #0f231d;
+      --emerald: #10b981;
+      --emerald-light: #34d399;
+      --cyan: #06b6d4;
+      --cyan-light: #22d3ee;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #1d3a31;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 30px; overflow-x: hidden; }
+
+    .app-bar {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(6, 17, 14, 0.95); backdrop-filter: blur(14px);
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+    }
+    .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+
+    .lang-switch {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 4px; border-radius: 11px; height: 42px;
+    }
+    .flag-btn {
+      width: 34px; height: 32px; border-radius: 8px; border: 1.5px solid transparent;
+      background: transparent; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; padding: 3px; opacity: 0.45; transition: all 0.2s ease;
+    }
+    .flag-btn.active {
+      opacity: 1; border-color: var(--cyan-light);
+      background: rgba(6, 182, 212, 0.18);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.35);
+    }
+    .flag-svg { width: 24px; height: 17px; border-radius: 3px; display: block; object-fit: cover; }
+
+    .drawer-btn {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative; flex-shrink: 0;
+    }
+    .saved-count-dot {
+      position: absolute; top: -4px; right: -4px; background: var(--cyan-light); color: #000;
+      font-size: 0.65rem; font-weight: 900; width: 18px; height: 18px; border-radius: 50%;
+      display: none; align-items: center; justify-content: center;
+    }
+    .brand-logo {
+      display: flex; align-items: center; gap: 8px; direction: ltr;
+      font-size: 1.24rem; font-weight: 900; letter-spacing: 1.2px; color: #fff;
+    }
+    .health-header-svg { width: 28px; height: 28px; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.55)); }
+    .brand-highlight { color: var(--cyan-light); }
+
+    .search-wrap { position: relative; width: 100%; margin-bottom: 10px; }
+    .search-icon {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      width: 18px; height: 18px; color: var(--muted); pointer-events: none;
+    }
+    html[dir="ltr"] .search-icon { right: auto; left: 14px; }
+    .search-input {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 42px 10px 14px; border-radius: 12px;
+      font-size: 0.88rem; outline: none;
+    }
+    .search-input:focus { border-color: var(--cyan-light); }
+
+    .toolbar { display: grid; grid-template-columns: 1fr 1fr 42px; gap: 8px; align-items: center; }
+    .tool-btn {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      height: 40px; padding: 0 10px; border-radius: 11px; font-size: 0.78rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+    }
+    .tool-btn svg { width: 16px; height: 16px; color: var(--cyan-light); flex-shrink: 0; }
+    .refresh-icon-btn {
+      background: var(--surface); border: 1px solid var(--border); color: var(--emerald-light);
+      width: 42px; height: 40px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+
+    .container { padding: 14px 16px; max-width: 600px; margin: 0 auto; }
+    .hero-slider {
+      position: relative; border-radius: 18px; overflow: hidden; height: 248px;
+      margin-bottom: 18px; border: 1px solid rgba(6, 182, 212, 0.38); background: #000;
+    }
+    .hero-slide-inner { width: 100%; height: 100%; position: relative; cursor: pointer; }
+    .hero-slide-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(6,17,14,0.98) 14%, rgba(6,17,14,0.2) 100%);
+      display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 16px 26px;
+    }
+    .bookmark-Quick {
+      position: absolute; top: 12px; left: 12px; z-index: 6;
+      background: rgba(6, 17, 14, 0.82); border: 1px solid var(--border);
+      width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff;
+    }
+    html[dir="ltr"] .bookmark-Quick { left: auto; right: 12px; }
+    .bookmark-Quick.saved { background: var(--cyan-light); color: #000; }
+    .hot-tag-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .hot-badge { background: linear-gradient(135deg, #10b981, #06b6d4); color: #fff; font-size: 0.7rem; font-weight: 900; padding: 3px 10px; border-radius: 6px; }
+    .news-code-badge { background: rgba(6, 182, 212, 0.2); border: 1px solid rgba(34, 211, 238, 0.45); color: var(--cyan-light); font-size: 0.7rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; }
+    .hero-title { font-size: 1.02rem; font-weight: 800; line-height: 1.55; color: #fff; margin-bottom: 6px; }
+    .hero-date { font-size: 0.7rem; color: var(--muted); }
+    .slider-dots { position: absolute; bottom: 9px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 6; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.35); cursor: pointer; }
+    .dot.active { width: 20px; border-radius: 10px; background: var(--cyan-light); }
+
+    .news-list { display: flex; flex-direction: column; gap: 12px; }
+    .news-item {
+      position: relative; display: flex; gap: 12px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 14px; padding: 10px; align-items: center; cursor: pointer;
+    }
+    .thumb { width: 96px; height: 86px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #000; }
+    .item-content { flex: 1; min-width: 0; }
+    .item-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .item-code { font-size: 0.72rem; color: var(--cyan-light); font-weight: 800; }
+    .item-bookmark { background: transparent; border: none; color: var(--muted); padding: 4px; cursor: pointer; }
+    .item-bookmark.saved { color: var(--cyan-light); }
+    .item-title { font-size: 0.88rem; font-weight: 700; line-height: 1.55; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; }
+    .item-date { font-size: 0.68rem; color: var(--muted); }
+
+    .article-page { position: fixed; inset: 0; background: var(--bg); z-index: 90; overflow-y: auto; display: none; flex-direction: column; }
+    .article-page.open { display: flex; }
+    .article-topbar { position: sticky; top: 0; z-index: 10; background: rgba(6, 17, 14, 0.94); backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 6px; }
+    .article-actions { display: flex; align-items: center; gap: 6px; }
+    .top-btn { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 7px 11px; border-radius: 10px; font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+    .top-btn.saved { background: var(--cyan-light); color: #000; }
+    .article-container { max-width: 600px; margin: 0 auto; width: 100%; padding-bottom: 40px; }
+    .article-hero-img { width: 100%; height: 245px; object-fit: cover; display: block; background: #000; }
+    .article-body { padding: 18px 16px; }
+    .article-meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.76rem; color: var(--muted); }
+    .article-headline { font-size: 1.18rem; font-weight: 900; line-height: 1.65; color: #fff; margin-bottom: 16px; }
+    .article-lead { background: var(--surface); border-right: 4px solid var(--cyan-light); padding: 12px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; line-height: 1.8; color: #e2e8f0; margin-bottom: 18px; }
+    html[dir="ltr"] .article-lead { border-right: none; border-left: 4px solid var(--cyan-light); }
+    .article-paragraph { font-size: 0.95rem; line-height: 2; color: #cbd5e1; margin-bottom: 16px; text-align: justify; }
+
+    .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 110; display: none; }
+    .drawer-backdrop.open { display: block; }
+    .left-drawer { position: fixed; top: 0; bottom: 0; left: 0; width: 85%; max-width: 340px; background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%); color: #0f172a; border-right: 2px solid #94a3b8; z-index: 120; transform: translateX(-100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+    .left-drawer.open { transform: translateX(0); }
+    .drawer-header { padding: 14px 16px; border-bottom: 1px solid #94a3b8; background: rgba(255, 255, 255, 0.55); display: flex; justify-content: space-between; align-items: center; }
+    .drawer-title { font-size: 0.95rem; font-weight: 900; color: #0f172a; }
+    .drawer-close-btn { background: #0f172a; color: #fff; border: none; width: 32px; height: 32px; border-radius: 8px; font-weight: 800; cursor: pointer; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 12px; }
+    .drawer-footer { padding: 12px 14px; border-top: 1px solid #94a3b8; background: #cbd5e1; display: flex; flex-direction: column; gap: 7px; }
+    .footer-link { background: #f8fafc; border: 1px solid #94a3b8; color: #0f172a; padding: 9px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+
+    .sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 130; display: none; align-items: flex-end; justify-content: center; }
+    .sheet-backdrop.open { display: flex; }
+    .sheet-box { background: var(--surface); width: 100%; max-width: 600px; border-radius: 22px 22px 0 0; padding: 18px; border-top: 1px solid var(--border); max-height: 80vh; overflow-y: auto; }
+    .sheet-title { font-size: 0.98rem; font-weight: 800; margin-bottom: 14px; color: var(--cyan-light); }
+    .option-list { display: flex; flex-direction: column; gap: 8px; }
+    .option-item { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 11px; font-size: 0.86rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .option-item.selected { border-color: var(--cyan-light); color: var(--cyan-light); background: rgba(6, 182, 212, 0.12); }
+
+    .exit-toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(15, 23, 42, 0.96); color: #fff; border: 1px solid rgba(255,255,255,0.28); padding: 11px 20px; border-radius: 30px; font-size: 0.84rem; font-weight: 800; z-index: 5000; opacity: 0; pointer-events: none; transition: opacity 0.22s ease; }
+    .exit-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* انیمیشن موج قلب و سلامت در شروع */
+    .health-splash { position: fixed; inset: 0; z-index: 9500; background: #020a08; display: none; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+    .health-splash.active { display: flex; }
+    .pulse-wave { position: absolute; width: 300px; height: 300px; border-radius: 50%; border: 2px solid rgba(16, 185, 129, 0.4); animation: pulseRing 2.2s infinite ease-out; }
+    @keyframes pulseRing {
+      0% { transform: scale(0.4); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    .splash-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; opacity: 0; animation: healthFadeIn 2.8s ease forwards; }
+    @keyframes healthFadeIn {
+      0% { opacity: 0; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 0; transform: scale(1.1); }
+    }
+    .splash-title { font-size: 2.35rem; font-weight: 900; letter-spacing: 3px; direction: ltr; background: linear-gradient(90deg, #34d399, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 14px; }
+
+    .ad-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; flex-direction: column; }
+    .ad-overlay.open { display: flex; }
+    .ad-close-btn { position: absolute; top: 16px; right: 16px; z-index: 10000; width: 40px; height: 40px; border-radius: 50%; background: rgba(15, 28, 24, 0.92); border: 2px solid var(--cyan-light); color: #fff; font-size: 1.2rem; font-weight: 900; display: none; align-items: center; justify-content: center; cursor: pointer; }
+    .ad-iframe { width: 100%; height: 100%; border: none; background: #06110e; }
+    .status { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+
+  <div class="ad-overlay" id="ad-overlay">
+    <button class="ad-close-btn" id="ad-close-btn" onclick="closeAd()">✕</button>
+    <iframe class="ad-iframe" id="ad-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+  </div>
+
+  <div class="health-splash" id="health-splash">
+    <div class="pulse-wave"></div>
+    <div class="splash-content">
+      <svg width="120" height="120" viewBox="0 0 64 64" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M32 54L6 28C2 24 2 17 7 12C12 7 19 7 23 11L32 20L41 11C45 7 52 7 57 12C62 17 62 24 58 28L32 54Z" fill="#10b981" fill-opacity="0.3"/>
+      </svg>
+      <div class="splash-title">Health Plus</div>
+    </div>
+  </div>
+
+  <div class="exit-toast" id="exit-toast">جهت خروج از برنامه، یک‌بار دیگر دکمه بازگشت را بزنید</div>
+
+  <header class="app-bar">
+    <div class="top-row">
+      <div class="brand-logo">
+        <svg class="health-header-svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <rect x="6" y="8" width="52" height="48" rx="10" fill="#091d18" stroke="#06b6d4"/>
+          <path d="M20 32H28L32 22L38 42L42 32H48" stroke="#34d399" stroke-width="3.5"/>
+        </svg>
+        <span>HEALTH <span class="brand-highlight">PLUS</span></span>
+      </div>
+
+      <div class="header-actions">
+        <div class="lang-switch">
+          <button class="flag-btn active" id="flag-fa-main" onclick="setLanguage('fa')">
+            <svg class="flag-svg" viewBox="0 0 28 20"><rect width="28" height="20" fill="#fff"/><rect width="28" height="6.66" y="0" fill="#239f40"/><rect width="28" height="6.66" y="13.34" fill="#da0000"/><circle cx="14" cy="10" r="2.2" fill="none" stroke="#da0000" stroke-width="1.1"/></svg>
+          </button>
+          <button class="flag-btn" id="flag-en-main" onclick="setLanguage('en')">
+            <svg class="flag-svg" viewBox="0 0 28 20"><rect width="28" height="20" fill="#012169"/><path d="M0,0 L28,20 M28,0 L0,20" stroke="#fff" stroke-width="4"/><path d="M14,0 V20 M0,10 H28" stroke="#fff" stroke-width="6"/></svg>
+          </button>
+        </div>
+
+        <button class="drawer-btn" onclick="openDrawer()">
+          <span class="saved-count-dot" id="saved-badge">0</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="search" class="search-input" placeholder="جستجو در مقالات سلامت" />
+    </div>
+
+    <div class="toolbar">
+      <button class="tool-btn" id="filter-btn" onclick="openFilterSheet()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+        <span id="filter-label">فیلتر: همه مطالب</span>
+      </button>
+
+      <button class="tool-btn" id="sort-btn" onclick="openSortSheet()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="4" y1="6" x2="13" y2="6"></line><polyline points="15 15 18 18 21 15"></polyline></svg>
+        <span id="sort-label">مرتب‌سازی: جدیدترین</span>
+      </button>
+
+      <button class="refresh-icon-btn" onclick="loadNews(true)" title="بروزرسانی">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="container" id="app-content">
+    <div class="status">در حال بارگذاری مقالات سلامت و تندرستی...</div>
+  </main>
+
+  <div class="article-page" id="article-page">
+    <div class="article-topbar">
+      <button class="top-btn" id="article-back-btn" onclick="closeArticle()">→ بازگشت</button>
+      <div class="article-actions">
+        <button class="top-btn" id="article-bookmark-btn">نشان کردن</button>
+      </div>
+    </div>
+    <div class="article-container" id="article-content"></div>
+  </div>
+
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
+  <aside class="left-drawer" id="left-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title" id="drawer-title-text">مطالب نشان‌شده</span>
+      <button class="drawer-close-btn" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-body" id="saved-list"></div>
+    <div class="drawer-footer">
+      <button class="footer-link" onclick="openInfoModal('about')"><span id="menu-about-text">درباره ما</span><span>❮</span></button>
+      <button class="footer-link" onclick="openInfoModal('rules')"><span id="menu-rules-text">قوانین و حریم خصوصی</span><span>❮</span></button>
+      <button class="footer-link" onclick="openInfoModal('contact')"><span id="menu-contact-text">تماس با ما</span><span>❮</span></button>
+    </div>
+  </aside>
+
+  <div class="sheet-backdrop" id="sheet-backdrop" onclick="if(event.target===this) closeSheet()">
+    <div class="sheet-box" id="sheet-box"></div>
+  </div>
+
+  <script>
+    const GITHUB_REPO = "frankalayari-beep/healthnews";
+    const CDN_JSON_URL = `https://cdn.jsdelivr.net/gh/${GITHUB_REPO}@main/news.json`;
+    const FALLBACK_JSON_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/news.json`;
+    const ADSTERRA_URL = "https://asiafilm.org/4/052064ca4ffd0916d363a8d4ca962a64";
+
+    let allNews = [];
+    let savedMap = JSON.parse(localStorage.getItem('hl_saved_news') || '{}');
+    let currentLang = localStorage.getItem('hl_lang') || 'fa';
+    let currentFilter = 'ALL';
+    let currentSort = 'NEWEST';
+    let adOpen = false;
+    let splashOpen = false;
+    let isFirstStartupAd = true;
+    let lastBackPressTime = 0;
+    let hotHeroList = [];
+    let currentHeroIndex = 0;
+
+    const UI_TEXT = {
+      fa: {
+        dir: 'rtl',
+        searchPlaceholder: 'جستجو در مقالات سلامت...',
+        filterPrefix: 'فیلتر',
+        sortPrefix: 'مرتب‌سازی',
+        filterModalTitle: 'فیلتر موضوعی سلامت و تندرستی',
+        sortModalTitle: 'مرتب‌سازی بر اساس',
+        hotBadge: '🔥 برگزیده سلامت',
+        newsCode: 'مطلب #',
+        backBtn: '→ بازگشت',
+        bookmarkBtn: 'نشان کردن',
+        bookmarkedBtn: '✓ نشان‌شده',
+        drawerTitle: 'مطالب نشان‌شده',
+        emptySaved: 'هنوز مطلبی را نشان نکرده‌اید.',
+        emptyFeed: 'مطلبی یافت نشد.',
+        syncing: 'در حال بروزرسانی مقالات سلامت...',
+        translating: 'تغییر زبان...',
+        exitToast: 'جهت خروج از برنامه، یک‌بار دیگر دکمه بازگشت را بزنید',
+        aboutMenu: 'درباره ما',
+        rulesMenu: 'قوانین و حریم خصوصی',
+        contactMenu: 'تماس با ما',
+        filters: {
+          'ALL': 'همه مطالب',
+          'medical': 'پزشکی و درمان',
+          'nutrition': 'تغذیه و رژیم سالم',
+          'mental': 'سلامت روان و خواب',
+          'fitness': 'تناسب اندام و ورزش',
+          'beauty': 'پوست، مو و زیبایی'
+        },
+        sorts: { 'NEWEST': 'جدیدترین', 'OLDEST': 'قدیمی‌ترین', 'SAVED_FIRST': 'نشان‌شده‌ها در صدر' }
+      },
+      en: {
+        dir: 'ltr',
+        searchPlaceholder: 'Search health & wellness articles...',
+        filterPrefix: 'Filter',
+        sortPrefix: 'Sort',
+        filterModalTitle: 'Filter Health Topics',
+        sortModalTitle: 'Sort Articles By',
+        hotBadge: '🔥 Featured Wellness',
+        newsCode: 'Article #',
+        backBtn: '← Back',
+        bookmarkBtn: 'Bookmark',
+        bookmarkedBtn: '✓ Saved',
+        drawerTitle: 'Saved Articles',
+        emptySaved: 'No bookmarked articles yet.',
+        emptyFeed: 'No matching health articles found.',
+        syncing: 'Refreshing health articles...',
+        translating: 'Switching language...',
+        exitToast: 'Press back again to exit Health Plus',
+        aboutMenu: 'About Us',
+        rulesMenu: 'Terms & Privacy',
+        contactMenu: 'Contact Us',
+        filters: {
+          'ALL': 'All Health News',
+          'medical': 'Medical & Treatment',
+          'nutrition': 'Nutrition & Diet',
+          'mental': 'Mental Health & Sleep',
+          'fitness': 'Fitness & Workout',
+          'beauty': 'Skin, Hair & Beauty'
+        },
+        sorts: { 'NEWEST': 'Newest', 'OLDEST': 'Oldest', 'SAVED_FIRST': 'Bookmarked First' }
+      }
+    };
+
+    function formatNewsDate(isoStr) {
+      try {
+        const d = isoStr ? new Date(isoStr) : new Date();
+        return currentLang === 'fa' ? new Intl.DateTimeFormat('fa-IR-u-ca-persian', {dateStyle: 'medium'}).format(d) : new Intl.DateTimeFormat('en-GB', {dateStyle: 'medium'}).format(d);
+      } catch(e) { return ''; }
+    }
+
+    function getItemTitle(item) {
+      return currentLang === 'en' ? (item.title_en || item.title) : item.title;
+    }
+
+    function getItemParagraphs(item) {
+      if (currentLang === 'en' && item.content_en && item.content_en.length) return item.content_en;
+      return item.content || [item.summary];
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('hl_lang', lang);
+      const t = UI_TEXT[lang];
+      document.documentElement.lang = lang;
+      document.documentElement.dir = t.dir;
+
+      ['main'].forEach(pos => {
+        document.getElementById(`flag-fa-${pos}`).classList.toggle('active', lang === 'fa');
+        document.getElementById(`flag-en-${pos}`).classList.toggle('active', lang === 'en');
+      });
+
+      document.getElementById('search').placeholder = t.searchPlaceholder;
+      document.getElementById('filter-label').textContent = `${t.filterPrefix}: ${t.filters[currentFilter]}`;
+      document.getElementById('sort-label').textContent = `${t.sortPrefix}: ${t.sorts[currentSort]}`;
+      document.getElementById('drawer-title-text').textContent = t.drawerTitle;
+      document.getElementById('menu-about-text').textContent = t.aboutMenu;
+      document.getElementById('menu-rules-text').textContent = t.rulesMenu;
+      document.getElementById('menu-contact-text').textContent = t.contactMenu;
+      render();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('exit-toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+
+    function triggerMandatoryAd() {
+      if (!ADSTERRA_URL) return;
+      adOpen = true;
+      const overlay = document.getElementById('ad-overlay');
+      const closeBtn = document.getElementById('ad-close-btn');
+      closeBtn.style.display = 'none';
+      document.getElementById('ad-iframe').src = ADSTERRA_URL;
+      overlay.classList.add('open');
+      setTimeout(() => closeBtn.style.display = 'flex', 15000);
+    }
+
+    function closeAd() {
+      adOpen = false;
+      document.getElementById('ad-overlay').classList.remove('open');
+      document.getElementById('ad-iframe').src = 'about:blank';
+      if (isFirstStartupAd) {
+        isFirstStartupAd = false;
+        playSplash();
+      }
+    }
+
+    function playSplash() {
+      splashOpen = true;
+      const s = document.getElementById('health-splash');
+      s.classList.add('active');
+      setTimeout(() => { s.classList.remove('active'); splashOpen = false; }, 2800);
+    }
+
+    setInterval(() => { if (!adOpen && !splashOpen) triggerMandatoryAd(); }, 30 * 60 * 1000);
+
+    function updateSavedBadge() {
+      const count = Object.keys(savedMap).length;
+      const badge = document.getElementById('saved-badge');
+      badge.textContent = count;
+      badge.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    function toggleBookmarkById(newsId, ev) {
+      if (ev) ev.stopPropagation();
+      const item = allNews.find(n => String(n.news_id) === String(newsId)) || savedMap[String(newsId)];
+      if (!item) return;
+      const key = String(item.news_id);
+      if (savedMap[key]) delete savedMap[key];
+      else savedMap[key] = item;
+      localStorage.setItem('hl_saved_news', JSON.stringify(savedMap));
+      updateSavedBadge();
+      render();
+      if (document.getElementById('left-drawer').classList.contains('open')) renderSavedDrawer();
+    }
+
+    function isBookmarked(item) { return Boolean(savedMap[String(item.news_id)]); }
+
+    async function loadNews(manual = false) {
+      const container = document.getElementById('app-content');
+      try {
+        let res = await fetch(`${CDN_JSON_URL}?t=${Date.now()}`);
+        if (!res.ok) res = await fetch(`${FALLBACK_JSON_URL}?t=${Date.now()}`);
+        if (!res.ok) res = await fetch(`./news.json?t=${Date.now()}`);
+        if (!res.ok) throw new Error();
+        allNews = await res.json();
+        render();
+      } catch(e) {
+        container.innerHTML = `<div class="status">خطا در بارگذاری مقالات. لطفا دکمه بروزرسانی را بزنید.</div>`;
+      }
+    }
+
+    function render() {
+      const container = document.getElementById('app-content');
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      let list = allNews.filter(n => {
+        const matchCat = currentFilter === 'ALL' || n.category === currentFilter;
+        const matchQ = !q || getItemTitle(n).toLowerCase().includes(q) || (n.summary || '').toLowerCase().includes(q);
+        return matchCat && matchQ;
+      });
+
+      if (currentSort === 'NEWEST') list.sort((a,b) => b.news_id - a.news_id);
+      else if (currentSort === 'OLDEST') list.sort((a,b) => a.news_id - b.news_id);
+      else if (currentSort === 'SAVED_FIRST') list.sort((a,b) => Number(isBookmarked(b)) - Number(isBookmarked(a)) || (b.news_id - a.news_id));
+
+      if (!list.length) {
+        container.innerHTML = `<div class="status">مطلبی یافت نشد.</div>`;
+        return;
+      }
+
+      hotHeroList = list.slice(0, 3);
+      const hero = hotHeroList[currentHeroIndex] || list[0];
+      const rest = list.filter(n => n.news_id !== hero.news_id);
+      const t = UI_TEXT[currentLang];
+      const heroSaved = isBookmarked(hero);
+
+      container.innerHTML = `
+        <div class="hero-slider">
+          <div class="hero-slide-inner" onclick="openArticleById(${hero.news_id})">
+            <button class="bookmark-Quick ${heroSaved ? 'saved' : ''}" onclick="toggleBookmarkById(${hero.news_id}, event)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="${heroSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </button>
+            <img src="${hero.image}" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80'" />
+            <div class="hero-overlay">
+              <div class="hot-tag-row"><span class="hot-badge">${t.hotBadge}</span><span class="news-code-badge">${t.newsCode} ${hero.news_id}</span></div>
+              <h2 class="hero-title">${getItemTitle(hero)}</h2>
+              <div class="hero-date">${formatNewsDate(hero.timestamp)}</div>
+            </div>
+          </div>
+        </div>
+        <div class="news-list">
+          ${rest.map(item => {
+            const saved = isBookmarked(item);
+            return `
+              <div class="news-item" onclick="openArticleById(${item.news_id})">
+                <img class="thumb" src="${item.image}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&q=80'" />
+                <div class="item-content">
+                  <div class="item-top-bar">
+                    <span class="item-code">${t.newsCode} ${item.news_id}</span>
+                    <button class="item-bookmark ${saved ? 'saved' : ''}" onclick="toggleBookmarkById(${item.news_id}, event)">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="${saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2 z"/></svg>
+                    </button>
+                  </div>
+                  <h3 class="item-title">${getItemTitle(item)}</h3>
+                  <div class="item-date">${formatNewsDate(item.timestamp)}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function openArticleById(newsId) {
+      const item = allNews.find(n => String(n.news_id) === String(newsId)) || savedMap[String(newsId)];
+      if (!item) return;
+      window.currentOpenArticle = item;
+      const t = UI_TEXT[currentLang];
+      const paragraphs = getItemParagraphs(item);
+
+      document.getElementById('article-content').innerHTML = `
+        <img class="article-hero-img" src="${item.image}" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80'" />
+        <div class="article-body">
+          <div class="article-meta-row"><span class="news-code-badge">${t.newsCode} ${item.news_id}</span><span>${formatNewsDate(item.timestamp)}</span></div>
+          <h1 class="article-headline">${getItemTitle(item)}</h1>
+          <div class="article-lead">${paragraphs[0] || ''}</div>
+          ${paragraphs.slice(1).map(p => `<p class="article-paragraph">${p}</p>`).join('')}
+        </div>
+      `;
+
+      syncBookmarkBtn();
+      const page = document.getElementById('article-page');
+      page.classList.add('open');
+      page.scrollTop = 0;
+      document.body.style.overflow = 'hidden';
+    }
+
+    function syncBookmarkBtn() {
+      const btn = document.getElementById('article-bookmark-btn');
+      const item = window.currentOpenArticle;
+      if (!item) return;
+      const t = UI_TEXT[currentLang];
+      const saved = isBookmarked(item);
+      btn.className = `top-btn ${saved ? 'saved' : ''}`;
+      btn.textContent = saved ? t.bookmarkedBtn : t.bookmarkBtn;
+      btn.onclick = () => { toggleBookmarkById(item.news_id); syncBookmarkBtn(); };
+    }
+
+    function closeArticle() {
+      document.getElementById('article-page').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function openDrawer() {
+      renderSavedDrawer();
+      document.getElementById('drawer-backdrop').classList.add('open');
+      document.getElementById('left-drawer').classList.add('open');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer-backdrop').classList.remove('open');
+      document.getElementById('left-drawer').classList.remove('open');
+    }
+
+    function renderSavedDrawer() {
+      const box = document.getElementById('saved-list');
+      const t = UI_TEXT[currentLang];
+      const list = Object.values(savedMap).sort((a,b) => b.news_id - a.news_id);
+      if (!list.length) { box.innerHTML = `<div class="status">${t.emptySaved}</div>`; return; }
+      box.innerHTML = `<div class="news-list">` + list.map(item => `
+        <div class="news-item" onclick="closeDrawer(); openArticleById(${item.news_id})">
+          <img class="thumb" src="${item.image}" style="width:72px;height:68px" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&q=80'" />
+          <div class="item-content">
+            <div class="item-top-bar"><span class="item-code">${t.newsCode} ${item.news_id}</span><button class="item-bookmark saved" style="color:#dc2626" onclick="toggleBookmarkById(${item.news_id}, event)">✕</button></div>
+            <h3 class="item-title" style="font-size:0.82rem">${getItemTitle(item)}</h3>
+          </div>
+        </div>
+      `).join('') + `</div>`;
+    }
+
+    function openFilterSheet() {
+      const t = UI_TEXT[currentLang];
+      const box = document.getElementById('sheet-box');
+      box.innerHTML = `<div class="sheet-title">${t.filterModalTitle}</div><div class="option-list">` +
+        Object.entries(t.filters).map(([k, label]) => `<div class="option-item ${currentFilter === k ? 'selected' : ''}" onclick="setFilter('${k}')"><span>${label}</span><span>${currentFilter === k ? '✓' : ''}</span></div>`).join('') + `</div>`;
+      document.getElementById('sheet-backdrop').classList.add('open');
+    }
+
+    function setFilter(k) { currentFilter = k; document.getElementById('filter-label').textContent = `${UI_TEXT[currentLang].filterPrefix}: ${UI_TEXT[currentLang].filters[k]}`; closeSheet(); render(); }
+
+    function openSortSheet() {
+      const t = UI_TEXT[currentLang];
+      const box = document.getElementById('sheet-box');
+      box.innerHTML = `<div class="sheet-title">${t.sortModalTitle}</div><div class="option-list">` +
+        Object.entries(t.sorts).map(([k, label]) => `<div class="option-item ${currentSort === k ? 'selected' : ''}" onclick="setSort('${k}')"><span>${label}</span><span>${currentSort === k ? '✓' : ''}</span></div>`).join('') + `</div>`;
+      document.getElementById('sheet-backdrop').classList.add('open');
+    }
+
+    function setSort(k) { currentSort = k; document.getElementById('sort-label').textContent = `${UI_TEXT[currentLang].sortPrefix}: ${UI_TEXT[currentLang].sorts[k]}`; closeSheet(); render(); }
+
+    function openInfoModal(type) {
+      closeDrawer();
+      const box = document.getElementById('sheet-box');
+      box.innerHTML = `<div class="sheet-title">${type==='about'?'درباره ما':type==='rules'?'قوانین و حریم خصوصی':'تماس با ما'}</div><p class="article-paragraph" style="font-size:0.86rem">${type==='about'?'اپلیکیشن Health Plus مرجع تخصصی مقالات سلامت، تندرستی و سبک زندگی سالم است.':type==='rules'?'این برنامه اطلاعات شخصی ذخیره نمی‌کند.':'پشتیبانی: healthplus.app@gmail.com'}</p>`;
+      document.getElementById('sheet-backdrop').classList.add('open');
+    }
+
+    function closeSheet() { document.getElementById('sheet-backdrop').classList.remove('open'); }
+
+    window.handleAndroidBack = function() {
+      if (adOpen || splashOpen) return "BLOCKED";
+      if (document.getElementById('sheet-backdrop').classList.contains('open')) { closeSheet(); return "HANDLED"; }
+      if (document.getElementById('left-drawer').classList.contains('open')) { closeDrawer(); return "HANDLED"; }
+      if (document.getElementById('article-page').classList.contains('open')) { closeArticle(); return "HANDLED"; }
+      const now = Date.now();
+      if (now - lastBackPressTime < 2400) return "EXIT";
+      lastBackPressTime = now;
+      showToast(UI_TEXT[currentLang].exitToast);
+      return "HANDLED";
+    };
+
+    document.getElementById('search').addEventListener('input', render);
+    updateSavedBadge();
+    triggerMandatoryAd();
+    loadNews();
+  </script>
+</body>
+</html>
