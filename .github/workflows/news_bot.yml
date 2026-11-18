@@ -1,0 +1,30 @@
+name: Auto Fetch & Translate Health News
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-news:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: python fetch_news.py
+      - run: |
+          git config --global user.name "Health Bot"
+          git config --global user.email "bot@github.com"
+          git add news.json
+          if ! git diff --staged --quiet; then
+            git commit -m "Auto-update health news"
+            git push
+            curl -s "https://purge.jsdelivr.net/gh/frankalayari-beep/healthnews@main/news.json" || true
+          fi
