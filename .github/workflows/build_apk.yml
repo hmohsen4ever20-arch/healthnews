@@ -1,66 +1,168 @@
-name: Build Signed Release APK (Health Plus)
+name: Build Signed Release APK (Health News)
 
 on:
   workflow_dispatch:
     inputs:
       version_code:
-        description: 'شماره نسخه (1)'
+        description: 'شماره نسخه عددی (نسخه اول: 1 | آپدیت‌های بعدی: 2، 3 و...)'
         required: true
         default: '1'
       version_name:
-        description: 'نام نسخه (1.0)'
+        description: 'نام نسخه نمایشی (مثلاً 1.0 یا 1.1)'
         required: true
         default: '1.0'
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - uses: actions/setup-java@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - run: |
+
+      - name: Install Capacitor & Initialize Android Project
+        run: |
           npm install
           npm run build
-          npx cap init "Health Plus" "ir.healthplus.app" --web-dir www
+          npx cap init "Health News" "ir.healthnews.app" --web-dir www
           npx cap add android
           npx cap sync android
 
-      - name: Generate Health Icon & Configure Android Back
+      - name: Generate Star of Life Medical Icon & Configure Android Back Key
         run: |
           pip install pillow
           python3 - << 'EOF'
+          import math, os, shutil
           from PIL import Image, ImageDraw
-          img = Image.new("RGBA", (512, 512), (6, 17, 14, 255))
-          draw = ImageDraw.Draw(img)
-          draw.rounded_rectangle([20, 20, 492, 492], radius=110, fill=(15, 35, 29, 255), outline=(6, 182, 212, 255), width=14)
-          draw.ellipse([80, 80, 432, 432], fill=(9, 29, 24, 255), outline=(16, 185, 129, 255), width=10)
-          draw.polygon([(256, 110), (140, 230), (256, 400), (372, 230)], fill=(52, 211, 153, 255))
-          img.save("Health-Icon.png")
 
-          import os, shutil
-          res = "android/app/src/main/res"
-          for fld, px in {"mipmap-mdpi":48, "mipmap-hdpi":72, "mipmap-xhdpi":96, "mipmap-xxhdpi":144, "mipmap-xxxhdpi":192}.items():
-              p = os.path.join(res, fld)
+          def rotated_rect(cx, cy, w, h, angle_deg):
+              rad = math.radians(angle_deg)
+              cos_a, sin_a = math.cos(rad), math.sin(rad)
+              corners = [(-w/2, -h/2), (w/2, -h/2), (w/2, h/2), (-w/2, h/2)]
+              return [(cx + x*cos_a - y*sin_a, cy + x*sin_a + y*cos_a) for x, y in corners]
+
+          def draw_star_of_life(final_size=512):
+              S = final_size * 2  # رندر 1024px برای لبه‌های کاملاً صاف و بدون پیکسلی شدن
+              img = Image.new("RGBA", (S, S), (255, 255, 255, 255))
+              draw = ImageDraw.Draw(img)
+              cx, cy = S / 2, S / 2
+
+              # لایه ۱: قاب بیرونی سرمه‌ای ستاره حیات (سه بازو با زاویه 0، 60 و 120 درجه)
+              for deg in (0, 60, 120):
+                  draw.polygon(rotated_rect(cx, cy, S*0.255, S*0.87, deg), fill=(0, 12, 130, 255))
+
+              # لایه ۲: خط سفید داخلی ممتد
+              for deg in (0, 60, 120):
+                  draw.polygon(rotated_rect(cx, cy, S*0.232, S*0.846, deg), fill=(255, 255, 255, 255))
+
+              # لایه ۳: پرشدگی آبی درخشان ستاره حیات
+              for deg in (0, 60, 120):
+                  draw.polygon(rotated_rect(cx, cy, S*0.205, S*0.820, deg), fill=(0, 32, 224, 255))
+
+              # مختصات بدن مار پیچیده به دور عصا
+              def snake_pts(t_start, t_end, steps=45):
+                  pts = []
+                  for i in range(steps + 1):
+                      t = t_start + (t_end - t_start) * (i / steps)
+                      y = cy - S*0.24 + t * (S*0.56)
+                      # موج سینوسی با عرض کاهنده به سمت دم
+                      amp = S * (0.088 * (1 - 0.35 * t))
+                      x = cx - math.sin(t * 2.55 * math.pi) * amp
+                      pts.append((x, y))
+                  return pts
+
+              def draw_thick_curve(pts, width_base, color, taper=True):
+                  n = len(pts)
+                  for i in range(n - 1):
+                      frac = i / max(1, n - 1)
+                      r = (width_base * (1.0 - 0.45 * frac) if taper else width_base) / 2
+                      x1, y1 = pts[i]
+                      x2, y2 = pts[i+1]
+                      draw.line([pts[i], pts[i+1]], fill=color, width=int(r*2))
+                      draw.ellipse([x1-r, y1-r, x1+r, y1+r], fill=color)
+                  x2, y2 = pts[-1]
+                  r = (width_base * 0.55 if taper else width_base) / 2
+                  draw.ellipse([x2-r, y2-r, x2+r, y2+r], fill=color)
+
+              # بخش پشت عصای مار
+              back1 = snake_pts(0.0, 0.22)
+              back2 = snake_pts(0.55, 0.85)
+              for seg in (back1, back2):
+                  draw_thick_curve(seg, S*0.052, (105, 70, 0, 255), taper=False)
+                  draw_thick_curve(seg, S*0.038, (255, 212, 0, 255), taper=False)
+
+              # عصای عمودی طلایی (Rod of Asclepius)
+              rod_w = S * 0.056
+              rod_top = cy - S * 0.335
+              rod_bot = cy + S * 0.355
+              draw.rounded_rectangle(
+                  [cx - rod_w/2 - 5, rod_top - 5, cx + rod_w/2 + 5, rod_bot + 5],
+                  radius=int(rod_w/2 + 5), fill=(105, 70, 0, 255)
+              )
+              draw.rounded_rectangle(
+                  [cx - rod_w/2, rod_top, cx + rod_w/2, rod_bot],
+                  radius=int(rod_w/2), fill=(255, 212, 0, 255)
+              )
+
+              # بخش‌های جلوی عصای مار (پیچش رویی)
+              front1 = snake_pts(0.18, 0.58)
+              front2 = snake_pts(0.80, 1.0)
+              for seg, is_tail in ((front1, False), (front2, True)):
+                  draw_thick_curve(seg, S*0.052, (105, 70, 0, 255), taper=is_tail)
+                  draw_thick_curve(seg, S*0.038, (255, 212, 0, 255), taper=is_tail)
+
+              # سر مار در بالای سمت چپ متمایل به راست (روی عصا)
+              head_pts = [
+                  (cx - S*0.082, cy - S*0.18),
+                  (cx - S*0.095, cy - S*0.24),
+                  (cx - S*0.055, cy - S*0.275),
+                  (cx + S*0.015, cy - S*0.268)
+              ]
+              draw_thick_curve(head_pts, S*0.056, (105, 70, 0, 255), taper=False)
+              draw_thick_curve(head_pts, S*0.042, (255, 212, 0, 255), taper=False)
+
+              # چشم مار
+              ex, ey = cx - S*0.004, cy - S*0.272
+              draw.ellipse([ex - 7, ey - 7, ex + 7, ey + 7], fill=(10, 25, 110, 255))
+
+              return img.resize((final_size, final_size), Image.Resampling.LANCZOS)
+
+          icon = draw_star_of_life(512)
+          icon.save("HealthNews-Icon-512x512.png")
+
+          res_dir = "android/app/src/main/res"
+          sizes = {"mipmap-mdpi": 48, "mipmap-hdpi": 72, "mipmap-xhdpi": 96, "mipmap-xxhdpi": 144, "mipmap-xxxhdpi": 192}
+          for folder, px in sizes.items():
+              p = os.path.join(res_dir, folder)
               os.makedirs(p, exist_ok=True)
-              im = img.resize((px, px), Image.Resampling.LANCZOS)
-              im.save(os.path.join(p, "ic_launcher.png"))
-              im.save(os.path.join(p, "ic_launcher_round.png"))
-              im.save(os.path.join(p, "ic_launcher_foreground.png"))
-          if os.path.exists(os.path.join(res, "mipmap-anydpi-v26")):
-              shutil.rmtree(os.path.join(res, "mipmap-anydpi-v26"))
+              resized = icon.resize((px, px), Image.Resampling.LANCZOS)
+              resized.save(os.path.join(p, "ic_launcher.png"))
+              resized.save(os.path.join(p, "ic_launcher_round.png"))
+              resized.save(os.path.join(p, "ic_launcher_foreground.png"))
+
+          anydpi = os.path.join(res_dir, "mipmap-anydpi-v26")
+          if os.path.exists(anydpi):
+              shutil.rmtree(anydpi)
           EOF
 
-          cat << 'EOF' > android/app/src/main/java/ir/healthplus/app/MainActivity.java
-          package ir.healthplus.app;
+          cat << 'EOF' > android/app/src/main/java/ir/healthnews/app/MainActivity.java
+          package ir.healthnews.app;
+
           import android.os.Bundle;
           import androidx.activity.OnBackPressedCallback;
           import com.getcapacitor.BridgeActivity;
+
           public class MainActivity extends BridgeActivity {
               @Override
               public void onCreate(Bundle savedInstanceState) {
@@ -71,31 +173,43 @@ jobs:
                           if (getBridge() != null && getBridge().getWebView() != null) {
                               getBridge().getWebView().evaluateJavascript(
                                   "(function(){ return window.handleAndroidBack ? window.handleAndroidBack() : 'EXIT'; })()",
-                                  res -> { if (res != null && res.contains("EXIT")) finish(); }
+                                  result -> {
+                                      if (result != null && result.contains("EXIT")) {
+                                          finish();
+                                      }
+                                  }
                               );
-                          } else { finish(); }
+                          } else {
+                              finish();
+                          }
                       }
                   });
               }
           }
           EOF
 
-      - name: Build & Sign APK
+      - name: Apply Version Code, Permanent Keystore & Sign Release APK
         working-directory: ./android
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
           VER_CODE="${{ github.event.inputs.version_code }}"
           VER_NAME="${{ github.event.inputs.version_name }}"
-          sed -i -E "s/versionCode[[:space:]]*=?[[:space:]]*[0-9]+/versionCode ${VER_CODE:-1}/g" app/build.gradle
-          sed -i -E "s/versionName[[:space:]]*=?[[:space:]]*\"[^\"]+\"/versionName \"${VER_NAME:-1.0}\"/g" app/build.gradle
+          VER_CODE=${VER_CODE:-1}
+          VER_NAME=${VER_NAME:-"1.0"}
+
+          sed -i -E "s/versionCode[[:space:]]*=?[[:space:]]*[0-9]+/versionCode $VER_CODE/g" app/build.gradle
+          sed -i -E "s/versionName[[:space:]]*=?[[:space:]]*\"[^\"]+\"/versionName \"$VER_NAME\"/g" app/build.gradle
 
           if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Using permanent keystore from GitHub Secrets..."
             echo "$KEYSTORE_BASE64" | base64 -d > release-key.jks
           else
+            echo "Generating new permanent keystore for first release..."
             keytool -genkey -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 \
               -alias appkey -storepass 123456 -keypass 123456 \
-              -dname "CN=HealthPlus, OU=Mobile, O=HealthApp, L=Mashhad, S=Khorasan, C=IR"
+              -dname "CN=HealthNews, OU=Mobile, O=HealthApp, L=Mashhad, S=Khorasan, C=IR"
+            base64 -w 0 release-key.jks > ../KEYSTORE_BASE64.txt
           fi
 
           chmod +x gradlew
@@ -105,8 +219,17 @@ jobs:
             -Pandroid.injected.signing.key.alias=appkey \
             -Pandroid.injected.signing.key.password=123456
 
-      - name: Upload APK
+      - name: Prepare APK for Upload
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk ./HealthNews-Release.apk
+
+      - name: Upload Signed APK, Store Icon & Keystore Backup
         uses: actions/upload-artifact@v4
         with:
-          name: HealthPlus-Release
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: HealthNews-Bazaar-Myket-Package
+          if-no-files-found: ignore
+          path: |
+            ./HealthNews-Release.apk
+            ./HealthNews-Icon-512x512.png
+            ./android/release-key.jks
+            ./KEYSTORE_BASE64.txt
