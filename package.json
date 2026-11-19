@@ -1,7 +1,7 @@
 {
-  "name": "health-plus",
+  "name": "health-news",
   "version": "1.0.0",
-  "description": "Health Plus - Wellness & Healthy Living App",
+  "description": "Health News - Medical, Wellness & Healthy Living App",
   "main": "index.html",
   "scripts": {
     "build": "mkdir -p www && cp index.html www/index.html && (cp news.json www/news.json || true)"
