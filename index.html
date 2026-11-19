@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Health Plus</title>
+  <title>Health News</title>
   <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" />
   <style>
     :root {
@@ -20,14 +20,16 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
     body { background: var(--bg); color: var(--text); padding-bottom: 30px; overflow-x: hidden; }
 
+    /* App Header */
     .app-bar {
       position: sticky; top: 0; z-index: 40;
       background: rgba(6, 17, 14, 0.95); backdrop-filter: blur(14px);
       padding: 12px 16px; border-bottom: 1px solid var(--border);
     }
-    .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
-    .header-actions { display: flex; align-items: center; gap: 6px; }
+    .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px; gap: 8px; }
+    .header-actions { display: flex; align-items: center; gap: 7px; }
 
+    /* Language Flag Switcher */
     .lang-switch {
       display: flex; align-items: center; gap: 4px;
       background: var(--surface); border: 1px solid var(--border);
@@ -42,6 +44,7 @@
       opacity: 1; border-color: var(--cyan-light);
       background: rgba(6, 182, 212, 0.18);
       box-shadow: 0 0 10px rgba(6, 182, 212, 0.35);
+      transform: scale(1.04);
     }
     .flag-svg { width: 24px; height: 16px; border-radius: 2px; display: block; object-fit: cover; }
 
@@ -57,11 +60,15 @@
     }
     .brand-logo {
       display: flex; align-items: center; gap: 8px; direction: ltr;
-      font-size: 1.2rem; font-weight: 900; letter-spacing: 1.2px; color: #fff;
+      font-size: 1.18rem; font-weight: 900; letter-spacing: 1px; color: #fff;
     }
-    .health-header-svg { width: 26px; height: 26px; filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.55)); }
+    .stethoscope-svg {
+      width: 29px; height: 29px; flex-shrink: 0;
+      filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.5));
+    }
     .brand-highlight { color: var(--cyan-light); }
 
+    /* Search Box */
     .search-wrap { position: relative; width: 100%; margin-bottom: 10px; }
     .search-icon {
       position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
@@ -73,49 +80,80 @@
       color: var(--text); padding: 10px 42px 10px 14px; border-radius: 12px;
       font-size: 0.88rem; outline: none;
     }
+    html[dir="ltr"] .search-input { padding: 10px 14px 10px 42px; }
     .search-input:focus { border-color: var(--cyan-light); }
 
-    .toolbar { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 6px; align-items: center; }
+    /* Filter, Sort & Refresh Toolbar */
+    .toolbar { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 7px; align-items: center; }
     .tool-btn {
       background: var(--surface); border: 1px solid var(--border); color: var(--text);
-      height: 38px; padding: 0 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      height: 39px; padding: 0 9px; border-radius: 10px; font-size: 0.76rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+      white-space: nowrap; overflow: hidden;
     }
-    .tool-btn svg { width: 15px; height: 15px; color: var(--cyan-light); flex-shrink: 0; }
+    .tool-btn span { overflow: hidden; text-overflow: ellipsis; }
+    .tool-btn svg { width: 16px; height: 16px; color: var(--cyan-light); flex-shrink: 0; }
     .refresh-icon-btn {
       background: var(--surface); border: 1px solid var(--border); color: var(--emerald-light);
-      width: 40px; height: 38px; border-radius: 10px;
+      width: 40px; height: 39px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center; cursor: pointer;
       transition: transform 0.25s ease;
     }
-    .refresh-icon-btn:active { transform: rotate(180deg); }
+    .refresh-icon-btn:active { transform: rotate(180deg); border-color: var(--cyan-light); }
 
+    /* Feed Container & Swipeable Hot Hero Slider */
     .container { padding: 14px 16px; max-width: 600px; margin: 0 auto; }
     .hero-slider {
-      position: relative; border-radius: 18px; overflow: hidden; height: 248px;
-      margin-bottom: 18px; border: 1px solid rgba(6, 182, 212, 0.38); background: #000;
+      position: relative; border-radius: 18px; overflow: hidden; height: 252px;
+      margin-bottom: 18px; border: 1px solid rgba(34, 211, 238, 0.38);
+      background: #000; touch-action: pan-y;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
-    .hero-slide-inner { width: 100%; height: 100%; position: relative; cursor: pointer; }
+    .hero-slide-inner {
+      width: 100%; height: 100%; position: relative; cursor: pointer;
+      animation: fadeSlide 0.28s ease-out;
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0.45; transform: scale(1.02); }
+      to { opacity: 1; transform: scale(1); }
+    }
     .hero-slide-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .hero-overlay {
       position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(6,17,14,0.98) 14%, rgba(6,17,14,0.2) 100%);
-      display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 16px 26px;
+      background: linear-gradient(to top, rgba(6,17,14,0.98) 15%, rgba(6,17,14,0.22) 100%);
+      display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 16px 28px;
     }
     .bookmark-Quick {
       position: absolute; top: 12px; left: 12px; z-index: 6;
-      background: rgba(6, 17, 14, 0.82); border: 1px solid var(--border);
-      width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;
+      background: rgba(6, 17, 14, 0.82); backdrop-filter: blur(6px);
+      border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff;
     }
     html[dir="ltr"] .bookmark-Quick { left: auto; right: 12px; }
-    .bookmark-Quick.saved { background: var(--cyan-light); color: #000; }
-    .hot-tag-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-    .hot-badge { background: linear-gradient(135deg, #10b981, #06b6d4); color: #fff; font-size: 0.7rem; font-weight: 900; padding: 3px 10px; border-radius: 6px; }
-    .news-code-badge { background: rgba(6, 182, 212, 0.2); border: 1px solid rgba(34, 211, 238, 0.45); color: var(--cyan-light); font-size: 0.7rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; }
+    .bookmark-Quick.saved { background: var(--cyan-light); color: #000; border-color: var(--cyan-light); }
+    .hot-tag-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+    .hot-badge {
+      background: linear-gradient(135deg, #10b981, #0284c7); color: #fff;
+      font-size: 0.7rem; font-weight: 900; padding: 3px 10px; border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+    }
+    .news-code-badge {
+      background: rgba(6, 182, 212, 0.2); border: 1px solid rgba(34, 211, 238, 0.45);
+      color: var(--cyan-light); font-size: 0.7rem; font-weight: 800; padding: 3px 9px; border-radius: 6px;
+    }
     .hero-title { font-size: 1.02rem; font-weight: 800; line-height: 1.55; color: #fff; margin-bottom: 6px; }
-    .hero-date { font-size: 0.7rem; color: var(--muted); }
+    .hero-date { font-size: 0.71rem; color: #cbd5e1; }
+    .slider-dots {
+      position: absolute; bottom: 9px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 6px; z-index: 6;
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.35);
+      transition: all 0.25s ease; cursor: pointer;
+    }
+    .dot.active { width: 20px; border-radius: 10px; background: var(--cyan-light); }
 
+    /* News List */
     .news-list { display: flex; flex-direction: column; gap: 12px; }
     .news-item {
       position: relative; display: flex; gap: 12px; background: var(--surface);
@@ -125,109 +163,232 @@
     .item-content { flex: 1; min-width: 0; }
     .item-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
     .item-code { font-size: 0.72rem; color: var(--cyan-light); font-weight: 800; }
-    .item-bookmark { background: transparent; border: none; color: var(--muted); padding: 4px; cursor: pointer; }
+    .item-bookmark {
+      background: transparent; border: none; color: var(--muted); padding: 4px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
     .item-bookmark.saved { color: var(--cyan-light); }
-    .item-title { font-size: 0.88rem; font-weight: 700; line-height: 1.55; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; }
-    .item-date { font-size: 0.68rem; color: var(--muted); }
+    .item-title {
+      font-size: 0.88rem; font-weight: 700; line-height: 1.55; color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px;
+    }
+    .item-date { font-size: 0.69rem; color: var(--muted); }
 
-    .article-page { position: fixed; inset: 0; background: var(--bg); z-index: 90; overflow-y: auto; display: none; flex-direction: column; }
+    /* Full Article View */
+    .article-page {
+      position: fixed; inset: 0; background: var(--bg); z-index: 90;
+      overflow-y: auto; display: none; flex-direction: column;
+    }
     .article-page.open { display: flex; }
-    .article-topbar { position: sticky; top: 0; z-index: 10; background: rgba(6, 17, 14, 0.94); backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 6px; }
+    .article-topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(6, 17, 14, 0.94); backdrop-filter: blur(12px);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 6px;
+    }
     .article-actions { display: flex; align-items: center; gap: 6px; }
-    .top-btn { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 7px 11px; border-radius: 10px; font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; }
-    .top-btn.saved { background: var(--cyan-light); color: #000; }
+    .top-btn {
+      background: var(--surface); color: var(--text); border: 1px solid var(--border);
+      padding: 7px 11px; border-radius: 10px; font-size: 0.78rem; font-weight: 700;
+      display: flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap;
+    }
+    .top-btn.saved { background: var(--cyan-light); color: #000; border-color: var(--cyan-light); }
     .article-container { max-width: 600px; margin: 0 auto; width: 100%; padding-bottom: 40px; }
     .article-hero-img { width: 100%; height: 245px; object-fit: cover; display: block; background: #000; }
     .article-body { padding: 18px 16px; }
     .article-meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.76rem; color: var(--muted); }
     .article-headline { font-size: 1.18rem; font-weight: 900; line-height: 1.65; color: #fff; margin-bottom: 16px; user-select: text; }
-    .article-lead { background: var(--surface); border-right: 4px solid var(--cyan-light); padding: 12px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; line-height: 1.8; color: #e2e8f0; margin-bottom: 18px; user-select: text; }
+    .article-lead {
+      background: var(--surface); border-right: 4px solid var(--cyan-light);
+      padding: 12px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 700;
+      line-height: 1.8; color: #e2e8f0; margin-bottom: 18px; user-select: text;
+    }
     html[dir="ltr"] .article-lead { border-right: none; border-left: 4px solid var(--cyan-light); }
     .article-paragraph { font-size: 0.95rem; line-height: 2; color: #cbd5e1; margin-bottom: 16px; text-align: justify; user-select: text; }
 
+    /* Left Slide-out Drawer (Silver Metallic Theme) */
     .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 110; display: none; }
     .drawer-backdrop.open { display: block; }
-    .left-drawer { position: fixed; top: 0; bottom: 0; left: 0; width: 85%; max-width: 340px; background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%); color: #0f172a; border-right: 2px solid #94a3b8; z-index: 120; transform: translateX(-100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+    .left-drawer {
+      position: fixed; top: 0; bottom: 0; left: 0; width: 85%; max-width: 340px;
+      background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+      color: #0f172a; border-right: 2px solid #94a3b8; z-index: 120;
+      transform: translateX(-100%); transition: transform 0.25s ease;
+      display: flex; flex-direction: column; box-shadow: 6px 0 24px rgba(0,0,0,0.5);
+    }
     .left-drawer.open { transform: translateX(0); }
-    .drawer-header { padding: 14px 16px; border-bottom: 1px solid #94a3b8; background: rgba(255, 255, 255, 0.55); display: flex; justify-content: space-between; align-items: center; }
+    .drawer-header {
+      padding: 14px 16px; border-bottom: 1px solid #94a3b8;
+      background: rgba(255, 255, 255, 0.55);
+      display: flex; justify-content: space-between; align-items: center;
+    }
     .drawer-title { font-size: 0.95rem; font-weight: 900; color: #0f172a; }
     .drawer-close-btn { background: #0f172a; color: #fff; border: none; width: 32px; height: 32px; border-radius: 8px; font-weight: 800; cursor: pointer; }
     .drawer-body { flex: 1; overflow-y: auto; padding: 12px; }
-    .drawer-footer { padding: 12px 14px; border-top: 1px solid #94a3b8; background: #cbd5e1; display: flex; flex-direction: column; gap: 7px; }
-    .footer-link { background: #f8fafc; border: 1px solid #94a3b8; color: #0f172a; padding: 9px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .drawer-body .news-item { background: #f8fafc; border: 1px solid #94a3b8; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08); }
+    .drawer-body .item-title { color: #0f172a; }
+    .drawer-body .item-code { color: #0284c7; }
+    .drawer-body .status { color: #334155; font-weight: 700; }
+    .drawer-footer {
+      padding: 12px 14px; border-top: 1px solid #94a3b8; background: #cbd5e1;
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .footer-link {
+      background: #f8fafc; border: 1px solid #94a3b8; color: #0f172a;
+      padding: 9px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 800;
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    }
 
+    /* Filter / Sort / Info Sheet Modal */
     .sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 130; display: none; align-items: flex-end; justify-content: center; }
     .sheet-backdrop.open { display: flex; }
-    .sheet-box { background: var(--surface); width: 100%; max-width: 600px; border-radius: 22px 22px 0 0; padding: 18px; border-top: 1px solid var(--border); max-height: 80vh; overflow-y: auto; }
+    .sheet-box {
+      background: var(--surface); width: 100%; max-width: 600px;
+      border-radius: 22px 22px 0 0; padding: 18px; border-top: 1px solid var(--border);
+      max-height: 80vh; overflow-y: auto;
+    }
     .sheet-title { font-size: 0.98rem; font-weight: 800; margin-bottom: 14px; color: var(--cyan-light); }
     .option-list { display: flex; flex-direction: column; gap: 8px; }
-    .option-item { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 11px; font-size: 0.86rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .option-item {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text);
+      padding: 11px 14px; border-radius: 11px; font-size: 0.86rem; font-weight: 700;
+      display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
     .option-item.selected { border-color: var(--cyan-light); color: var(--cyan-light); background: rgba(6, 182, 212, 0.12); }
 
-    .exit-toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(15, 23, 42, 0.96); color: #fff; border: 1px solid rgba(255,255,255,0.28); padding: 11px 20px; border-radius: 30px; font-size: 0.84rem; font-weight: 800; z-index: 5000; opacity: 0; pointer-events: none; transition: opacity 0.22s ease; }
+    /* Toast */
+    .exit-toast {
+      position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(15, 23, 42, 0.96); color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      padding: 11px 20px; border-radius: 30px; font-size: 0.84rem; font-weight: 800;
+      z-index: 5000; opacity: 0; pointer-events: none; white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.65);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
     .exit-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .health-splash { position: fixed; inset: 0; z-index: 9500; background: #020a08; display: none; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+    /* Health News Intro Splash */
+    .health-splash {
+      position: fixed; inset: 0; z-index: 9500;
+      background: radial-gradient(circle at center, #0a2420 0%, #020a08 75%);
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
     .health-splash.active { display: flex; }
-    .pulse-wave { position: absolute; width: 300px; height: 300px; border-radius: 50%; border: 2px solid rgba(16, 185, 129, 0.4); animation: pulseRing 2.2s infinite ease-out; }
-    @keyframes pulseRing { 0% { transform: scale(0.4); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
-    .splash-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; opacity: 0; animation: healthFadeIn 2.8s ease forwards; }
-    @keyframes healthFadeIn { 0% { opacity: 0; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0; transform: scale(1.1); } }
-    .splash-title { font-size: 2.35rem; font-weight: 900; letter-spacing: 3px; direction: ltr; background: linear-gradient(90deg, #34d399, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 14px; }
+    .pulse-wave {
+      position: absolute; width: 260px; height: 260px; border-radius: 50%;
+      border: 2.5px solid rgba(34, 211, 238, 0.45);
+      animation: pulseRing 2.1s infinite ease-out;
+    }
+    .pulse-wave.w2 { animation-delay: 0.65s; border-color: rgba(16, 185, 129, 0.4); }
+    @keyframes pulseRing {
+      0% { transform: scale(0.45); opacity: 0.95; }
+      100% { transform: scale(2.3); opacity: 0; }
+    }
+    .splash-content {
+      position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
+      opacity: 0; animation: healthFadeIn 3.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes healthFadeIn {
+      0% { opacity: 0; transform: scale(0.86); filter: blur(4px); }
+      28% { opacity: 1; transform: scale(1.03); filter: blur(0) drop-shadow(0 0 28px rgba(34, 211, 238, 0.7)); }
+      80% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.65)); }
+      100% { opacity: 0; transform: scale(1.08); filter: blur(2px); }
+    }
+    .splash-title {
+      font-size: 2.25rem; font-weight: 900; letter-spacing: 3px; direction: ltr;
+      background: linear-gradient(90deg, #34d399, #22d3ee, #60a5fa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-top: 16px;
+    }
 
+    /* Mandatory Adsterra Overlay */
     .ad-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; flex-direction: column; }
     .ad-overlay.open { display: flex; }
-    .ad-close-btn { position: absolute; top: 16px; right: 16px; z-index: 10000; width: 40px; height: 40px; border-radius: 50%; background: rgba(15, 28, 24, 0.92); border: 2px solid var(--cyan-light); color: #fff; font-size: 1.2rem; font-weight: 900; display: none; align-items: center; justify-content: center; cursor: pointer; }
+    .ad-close-btn {
+      position: absolute; top: 16px; right: 16px; z-index: 10000;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(15, 28, 24, 0.92); border: 2px solid var(--cyan-light);
+      color: #fff; font-size: 1.2rem; font-weight: 900;
+      display: none; align-items: center; justify-content: center; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+    }
     .ad-iframe { width: 100%; height: 100%; border: none; background: #06110e; }
     .status { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 0.88rem; }
   </style>
 </head>
 <body>
 
+  <!-- تبلیغ اجباری ۱۵ ثانیه‌ای -->
   <div class="ad-overlay" id="ad-overlay">
     <button class="ad-close-btn" id="ad-close-btn" onclick="closeAd()">✕</button>
     <iframe class="ad-iframe" id="ad-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
   </div>
 
+  <!-- صفحه ورود انیمیشنی همراه با صدای خوش‌آمدگویی ملایم -->
   <div class="health-splash" id="health-splash">
     <div class="pulse-wave"></div>
+    <div class="pulse-wave w2"></div>
     <div class="splash-content">
-      <svg width="120" height="120" viewBox="0 0 64 64" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M32 54L6 28C2 24 2 17 7 12C12 7 19 7 23 11L32 20L41 11C45 7 52 7 57 12C62 17 62 24 58 28L32 54Z" fill="#10b981" fill-opacity="0.3"/>
+      <!-- لوگوی ستاره حیات پزشکی -->
+      <svg width="134" height="134" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(60,60)">
+          <rect x="-13" y="-52" width="26" height="104" rx="3" fill="#001AA8" stroke="#ffffff" stroke-width="3"/>
+          <rect x="-13" y="-52" width="26" height="104" rx="3" fill="#001AA8" stroke="#ffffff" stroke-width="3" transform="rotate(60)"/>
+          <rect x="-13" y="-52" width="26" height="104" rx="3" fill="#001AA8" stroke="#ffffff" stroke-width="3" transform="rotate(120)"/>
+          <rect x="-11" y="-50" width="22" height="100" rx="2" fill="#0024E0"/>
+          <rect x="-11" y="-50" width="22" height="100" rx="2" fill="#0024E0" transform="rotate(60)"/>
+          <rect x="-11" y="-50" width="22" height="100" rx="2" fill="#0024E0" transform="rotate(120)"/>
+          <!-- عصای اسقلبیوس و مار طلایی -->
+          <rect x="-3.2" y="-36" width="6.4" height="72" rx="3.2" fill="#FFD400" stroke="#785000" stroke-width="1.2"/>
+          <path d="M-2 -24 C-13 -24 -13 -11 0 -8 C12 -5 12 8 -1 12 C-10 15 -9 25 2 29" fill="none" stroke="#FFD400" stroke-width="4.8" stroke-linecap="round"/>
+          <circle cx="-1" cy="-24" r="3.4" fill="#FFD400"/>
+          <circle cx="0" cy="-24.5" r="0.9" fill="#001AA8"/>
+        </g>
       </svg>
-      <div class="splash-title">Health Plus</div>
+      <div class="splash-title">Health News</div>
     </div>
   </div>
 
+  <!-- اعلان -->
   <div class="exit-toast" id="exit-toast">جهت خروج از برنامه، یک‌بار دیگر دکمه بازگشت را بزنید</div>
 
+  <!-- هدر اصلی -->
   <header class="app-bar">
     <div class="top-row">
+      <!-- لوگوی گوشی پزشکی + نام HEALTH NEWS -->
       <div class="brand-logo">
-        <svg class="health-header-svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
-          <rect x="6" y="8" width="52" height="48" rx="10" fill="#091d18" stroke="#06b6d4"/>
-          <path d="M20 32H28L32 22L38 42L42 32H48" stroke="#34d399" stroke-width="3.5"/>
+        <svg class="stethoscope-svg" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4.5 3h-1a1.5 1.5 0 0 0-1.5 1.5v3.5a5 5 0 0 0 10 0V4.5A1.5 1.5 0 0 0 10.5 3h-1"/>
+          <path d="M7 13v2a5 5 0 0 0 10 0v-2.5" stroke="#22d3ee"/>
+          <circle cx="17" cy="10" r="2.5" fill="#0f231d" stroke="#22d3ee"/>
+          <circle cx="17" cy="10" r="0.9" fill="#34d399" stroke="none"/>
         </svg>
-        <span>HEALTH <span class="brand-highlight">PLUS</span></span>
+        <span>HEALTH <span class="brand-highlight">NEWS</span></span>
       </div>
 
       <div class="header-actions">
-        <div class="lang-switch">
+        <div class="lang-switch" title="تغییر زبان / Switch Language">
           <!-- پرچم ایران -->
           <button class="flag-btn active" id="flag-fa-main" onclick="setLanguage('fa')" title="فارسی">
             <svg class="flag-svg" viewBox="0 0 28 20" xmlns="http://www.w3.org/2000/svg">
-              <rect width="28" height="20" fill="#fff"/><rect width="28" height="6.66" y="0" fill="#239f40"/><rect width="28" height="6.66" y="13.34" fill="#da0000"/>
+              <rect width="28" height="20" fill="#fff"/>
+              <rect width="28" height="6.66" y="0" fill="#239f40"/>
+              <rect width="28" height="6.66" y="13.34" fill="#da0000"/>
+              <circle cx="14" cy="10" r="2.1" fill="none" stroke="#da0000" stroke-width="1.1"/>
+              <line x1="14" y1="7.6" x2="14" y2="12.4" stroke="#da0000" stroke-width="1.1"/>
             </svg>
           </button>
-          <!-- پرچم صحیح بریتانیا (UK) -->
+          <!-- پرچم صحیح بریتانیا -->
           <button class="flag-btn" id="flag-en-main" onclick="setLanguage('en')" title="English">
             <svg class="flag-svg" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
-              <clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
-              <clipPath id="t"><path d="M30,15 h30 v15 z v-15 h-30 z h-30 v-15 z v15 h30 z"/></clipPath>
-              <g clip-path="url(#s)">
+              <clipPath id="uk-s"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
+              <clipPath id="uk-t"><path d="M30,15 h30 v15 z v-15 h-30 z h-30 v-15 z v15 h30 z"/></clipPath>
+              <g clip-path="url(#uk-s)">
                 <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
                 <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
-                <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/>
+                <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-t)" stroke="#C8102E" stroke-width="4"/>
                 <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
                 <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
               </g>
@@ -235,7 +396,7 @@
           </button>
         </div>
 
-        <button class="drawer-btn" onclick="openDrawer()" title="منو">
+        <button class="drawer-btn" onclick="openDrawer()" title="منو و مطالب نشان‌شده">
           <span class="saved-count-dot" id="saved-badge">0</span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -246,28 +407,37 @@
       </div>
     </div>
 
+    <!-- کادر جستجو -->
     <div class="search-wrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
-      <input type="text" id="search" class="search-input" placeholder="جستجو در مقالات سلامت..." />
+      <input type="text" id="search" class="search-input" placeholder="جستجو در اخبار و مقالات سلامت..." />
     </div>
 
+    <!-- نوار ابزار: فیلتر + مرتب‌سازی (با آیکون دقیق و منظم) + بروزرسانی -->
     <div class="toolbar">
       <button class="tool-btn" id="filter-btn" onclick="openFilterSheet()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
         <span id="filter-label">فیلتر: همه مطالب</span>
       </button>
 
       <button class="tool-btn" id="sort-btn" onclick="openSortSheet()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="4" y1="6" x2="13" y2="6"></line><polyline points="15 15 18 18 21 15"></polyline></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="6" x2="13" y2="6"></line>
+          <line x1="4" y1="12" x2="11" y2="12"></line>
+          <line x1="4" y1="18" x2="11" y2="18"></line>
+          <polyline points="15 15 18 18 21 15"></polyline>
+          <line x1="18" y1="6" x2="18" y2="18"></line>
+        </svg>
         <span id="sort-label">مرتب‌سازی: جدیدترین</span>
       </button>
 
-      <!-- دکمه رفرش اصلاح شده با اتصال مستقیم به تابع بارگذاری -->
-      <button class="refresh-icon-btn" onclick="loadNews(true)" title="بروزرسانی مقالات">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <button class="refresh-icon-btn" onclick="loadNews(true)" title="بروزرسانی اخبار">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"></polyline>
           <polyline points="1 20 1 14 7 14"></polyline>
           <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
@@ -276,15 +446,31 @@
     </div>
   </header>
 
+  <!-- محتوای اصلی -->
   <main class="container" id="app-content">
-    <div class="status">در حال بارگذاری مقالات سلامت و تندرستی...</div>
+    <div class="status">در حال بارگذاری اخبار سلامت و تندرستی...</div>
   </main>
 
+  <!-- صفحه کامل خبر -->
   <div class="article-page" id="article-page">
     <div class="article-topbar">
       <button class="top-btn" id="article-back-btn" onclick="closeArticle()">→ بازگشت</button>
       <div class="article-actions">
-        <!-- اضافه شدن دکمه اشتراک‌گذاری در صفحه مقاله -->
+        <div class="lang-switch" style="height:35px;padding:2px">
+          <button class="flag-btn active" id="flag-fa-art" style="width:27px;height:27px" onclick="setLanguage('fa')">
+            <svg class="flag-svg" viewBox="0 0 28 20"><rect width="28" height="20" fill="#fff"/><rect width="28" height="6.66" y="0" fill="#239f40"/><rect width="28" height="6.66" y="13.34" fill="#da0000"/><circle cx="14" cy="10" r="2.1" fill="none" stroke="#da0000" stroke-width="1.1"/></svg>
+          </button>
+          <button class="flag-btn" id="flag-en-art" style="width:27px;height:27px" onclick="setLanguage('en')">
+            <svg class="flag-svg" viewBox="0 0 60 30">
+              <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
+              <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+              <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" stroke-width="3"/>
+              <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+              <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
+            </svg>
+          </button>
+        </div>
+
         <button class="top-btn" id="article-share-btn" onclick="shareCurrentArticle()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
@@ -298,6 +484,7 @@
     <div class="article-container" id="article-content"></div>
   </div>
 
+  <!-- منوی کشویی سمت چپ -->
   <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
   <aside class="left-drawer" id="left-drawer">
     <div class="drawer-header">
@@ -312,6 +499,7 @@
     </div>
   </aside>
 
+  <!-- پنجره فیلتر / مرتب‌سازی / اطلاعات -->
   <div class="sheet-backdrop" id="sheet-backdrop" onclick="if(event.target===this) closeSheet()">
     <div class="sheet-box" id="sheet-box"></div>
   </div>
@@ -323,36 +511,41 @@
     const ADSTERRA_URL = "https://asiafilm.org/4/052064ca4ffd0916d363a8d4ca962a64";
 
     let allNews = [];
-    let savedMap = JSON.parse(localStorage.getItem('hl_saved_news') || '{}');
-    let currentLang = localStorage.getItem('hl_lang') || 'fa';
+    let savedMap = JSON.parse(localStorage.getItem('hn_saved_news') || '{}');
+    let currentLang = localStorage.getItem('hn_lang') || 'fa';
     let currentFilter = 'ALL';
     let currentSort = 'NEWEST';
     let adOpen = false;
     let splashOpen = false;
     let isFirstStartupAd = true;
     let lastBackPressTime = 0;
+
     let hotHeroList = [];
     let currentHeroIndex = 0;
+    let touchStartX = 0;
+    let touchEndX = 0;
 
     const UI_TEXT = {
       fa: {
         dir: 'rtl',
-        searchPlaceholder: 'جستجو در مقالات سلامت...',
+        searchPlaceholder: 'جستجو در اخبار و مقالات سلامت...',
         filterPrefix: 'فیلتر',
         sortPrefix: 'مرتب‌سازی',
         filterModalTitle: 'فیلتر موضوعی سلامت و تندرستی',
         sortModalTitle: 'مرتب‌سازی بر اساس',
-        hotBadge: '🔥 برگزیده سلامت',
-        newsCode: 'مطلب #',
+        hotBadge: '🔥 اخبار جذاب و داغ',
+        newsCode: 'شماره خبر:',
         backBtn: '→ بازگشت',
         shareBtn: 'اشتراک‌گذاری',
         bookmarkBtn: 'نشان کردن',
         bookmarkedBtn: '✓ نشان‌شده',
         drawerTitle: 'مطالب نشان‌شده',
         emptySaved: 'هنوز مطلبی را نشان نکرده‌اید.',
-        emptyFeed: 'مطلبی یافت نشد.',
-        syncing: 'در حال بروزرسانی مقالات سلامت...',
-        copiedToast: 'لینک مطلب کپی شد',
+        emptyFeed: 'مطلبی با این مشخصات یافت نشد.',
+        syncing: 'در حال بروزرسانی آخرین اخبار سلامت...',
+        updatedToast: 'اخبار سلامت بروزرسانی شد',
+        translating: 'در حال تغییر زبان به فارسی...',
+        copiedToast: 'متن خبر برای اشتراک‌گذاری کپی شد',
         exitToast: 'جهت خروج از برنامه، یک‌بار دیگر دکمه بازگشت را بزنید',
         aboutMenu: 'درباره ما',
         rulesMenu: 'قوانین و حریم خصوصی',
@@ -369,13 +562,13 @@
       },
       en: {
         dir: 'ltr',
-        searchPlaceholder: 'Search health & wellness articles...',
+        searchPlaceholder: 'Search health & wellness news...',
         filterPrefix: 'Filter',
         sortPrefix: 'Sort',
         filterModalTitle: 'Filter Health Topics',
         sortModalTitle: 'Sort Articles By',
-        hotBadge: '🔥 Featured Wellness',
-        newsCode: 'Article #',
+        hotBadge: '🔥 Hot & Trending',
+        newsCode: 'News #',
         backBtn: '← Back',
         shareBtn: 'Share',
         bookmarkBtn: 'Bookmark',
@@ -383,9 +576,11 @@
         drawerTitle: 'Saved Articles',
         emptySaved: 'No bookmarked articles yet.',
         emptyFeed: 'No matching health articles found.',
-        syncing: 'Refreshing health articles...',
-        copiedToast: 'Article link copied!',
-        exitToast: 'Press back again to exit Health Plus',
+        syncing: 'Refreshing latest health news...',
+        updatedToast: 'Health news updated!',
+        translating: 'Switching to English...',
+        copiedToast: 'Article copied to clipboard!',
+        exitToast: 'Press back again to exit Health News',
         aboutMenu: 'About Us',
         rulesMenu: 'Terms & Privacy',
         contactMenu: 'Contact Us',
@@ -401,11 +596,72 @@
       }
     };
 
+    // پخش نوای خوش‌آمدگویی ملایم و دلنشین هنگام ورود (پس از بستن تبلیغ)
+    function playWelcomeChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') ctx.resume();
+
+        const now = ctx.currentTime;
+        // آکورد آرامش‌بخش ماژور ۹ (C5 - E5 - G5 - B5 - C6)
+        const notes = [523.25, 659.25, 783.99, 987.77, 1046.50];
+
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const harmonic = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.13);
+
+          harmonic.type = 'triangle';
+          harmonic.frequency.setValueAtTime(freq * 2, now + i * 0.13);
+
+          const start = now + i * 0.13;
+          const duration = i === notes.length - 1 ? 1.5 : 0.85;
+
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(0.14, start + 0.045);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+          const harmGain = ctx.createGain();
+          harmGain.gain.setValueAtTime(0.025, start);
+          harmGain.gain.exponentialRampToValueAtTime(0.0001, start + duration * 0.6);
+
+          osc.connect(gain);
+          harmonic.connect(harmGain);
+          harmGain.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(start);
+          harmonic.start(start);
+          osc.stop(start + duration + 0.05);
+          harmonic.stop(start + duration + 0.05);
+        });
+      } catch (e) {}
+    }
+
+    // نمایش تاریخ به همراه ساعت و دقیقه دقیق
     function formatNewsDate(isoStr) {
       try {
         const d = isoStr ? new Date(isoStr) : new Date();
-        return currentLang === 'fa' ? new Intl.DateTimeFormat('fa-IR-u-ca-persian', {dateStyle: 'medium'}).format(d) : new Intl.DateTimeFormat('en-GB', {dateStyle: 'medium'}).format(d);
-      } catch(e) { return ''; }
+        if (isNaN(d.getTime())) return currentLang === 'fa' ? 'امروز' : 'Today';
+        if (currentLang === 'fa') {
+          return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          }).format(d);
+        } else {
+          return new Intl.DateTimeFormat('en-GB', {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          }).format(d);
+        }
+      } catch (e) {
+        return '';
+      }
     }
 
     function getItemTitle(item) {
@@ -413,19 +669,49 @@
     }
 
     function getItemParagraphs(item) {
-      if (currentLang === 'en' && item.content_en && item.content_en.length) return item.content_en;
-      return item.content || [item.summary];
+      if (currentLang === 'en' && Array.isArray(item.content_en) && item.content_en.length) {
+        return item.content_en;
+      }
+      return Array.isArray(item.content) && item.content.length ? item.content : [item.summary || ''];
     }
 
-    function setLanguage(lang) {
+    async function translateOnTheFly(text, sl, tl) {
+      if (!text) return '';
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${tl}&dt=t&q=${encodeURIComponent(text.slice(0, 1800))}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data[0].map(x => x[0]).join('');
+      } catch (e) {
+        return text;
+      }
+    }
+
+    async function ensureEnglishTranslations() {
+      const missing = allNews.filter(n => !n.title_en);
+      if (!missing.length) return;
+      const separator = " ||| ";
+      const batch = missing.map(n => n.title).join(separator);
+      const tr = await translateOnTheFly(batch, 'fa', 'en');
+      const parts = tr.split(/\s*\|\|\|\s*/);
+      missing.forEach((item, idx) => { item.title_en = parts[idx] || item.title; });
+    }
+
+    async function setLanguage(lang) {
       currentLang = lang;
-      localStorage.setItem('hl_lang', lang);
+      localStorage.setItem('hn_lang', lang);
       const t = UI_TEXT[lang];
       document.documentElement.lang = lang;
       document.documentElement.dir = t.dir;
 
-      document.getElementById('flag-fa-main').classList.toggle('active', lang === 'fa');
-      document.getElementById('flag-en-main').classList.toggle('active', lang === 'en');
+      ['main', 'art'].forEach(pos => {
+        const btnFa = document.getElementById(`flag-fa-${pos}`);
+        const btnEn = document.getElementById(`flag-en-${pos}`);
+        if (btnFa && btnEn) {
+          btnFa.classList.toggle('active', lang === 'fa');
+          btnEn.classList.toggle('active', lang === 'en');
+        }
+      });
 
       document.getElementById('search').placeholder = t.searchPlaceholder;
       document.getElementById('filter-label').textContent = `${t.filterPrefix}: ${t.filters[currentFilter]}`;
@@ -436,14 +722,29 @@
       document.getElementById('menu-about-text').textContent = t.aboutMenu;
       document.getElementById('menu-rules-text').textContent = t.rulesMenu;
       document.getElementById('menu-contact-text').textContent = t.contactMenu;
+
+      if (lang === 'en') {
+        showToast(t.translating);
+        await ensureEnglishTranslations();
+      } else {
+        showToast('زبان برنامه به فارسی تغییر یافت');
+      }
+
       render();
+      if (document.getElementById('article-page').classList.contains('open') && window.currentOpenArticle) {
+        openArticleById(window.currentOpenArticle.news_id);
+      }
+      if (document.getElementById('left-drawer').classList.contains('open')) {
+        renderSavedDrawer();
+      }
     }
 
     function showToast(msg) {
       const toast = document.getElementById('exit-toast');
       toast.textContent = msg;
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2400);
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
     }
 
     function triggerMandatoryAd() {
@@ -454,7 +755,7 @@
       closeBtn.style.display = 'none';
       document.getElementById('ad-iframe').src = ADSTERRA_URL;
       overlay.classList.add('open');
-      setTimeout(() => closeBtn.style.display = 'flex', 15000);
+      setTimeout(() => { closeBtn.style.display = 'flex'; }, 15000);
     }
 
     function closeAd() {
@@ -463,6 +764,7 @@
       document.getElementById('ad-iframe').src = 'about:blank';
       if (isFirstStartupAd) {
         isFirstStartupAd = false;
+        playWelcomeChime(); // پخش نوای خوش‌آمدگویی بلافاصله هنگام شروع نمایش اولیه
         playSplash();
       }
     }
@@ -471,7 +773,10 @@
       splashOpen = true;
       const s = document.getElementById('health-splash');
       s.classList.add('active');
-      setTimeout(() => { s.classList.remove('active'); splashOpen = false; }, 2800);
+      setTimeout(() => {
+        s.classList.remove('active');
+        splashOpen = false;
+      }, 3100);
     }
 
     setInterval(() => { if (!adOpen && !splashOpen) triggerMandatoryAd(); }, 30 * 60 * 1000);
@@ -487,108 +792,220 @@
       if (ev) ev.stopPropagation();
       const item = allNews.find(n => String(n.news_id) === String(newsId)) || savedMap[String(newsId)];
       if (!item) return;
-      const key = String(item.news_id);
+      const key = String(item.news_id || item.link);
       if (savedMap[key]) delete savedMap[key];
       else savedMap[key] = item;
-      localStorage.setItem('hl_saved_news', JSON.stringify(savedMap));
+      localStorage.setItem('hn_saved_news', JSON.stringify(savedMap));
       updateSavedBadge();
-      render();
+      renderHeroSlide();
+      renderListOnly();
       if (document.getElementById('left-drawer').classList.contains('open')) renderSavedDrawer();
     }
 
-    function isBookmarked(item) { return Boolean(savedMap[String(item.news_id)]); }
+    function isBookmarked(item) { return Boolean(savedMap[String(item.news_id || item.link)]); }
+
+    function computeHotScore(item) {
+      let score = 0;
+      const text = `${item.title} ${(item.content || []).join(' ')}`;
+      const hotKeywords = [
+        "قلب", "سرطان", "دیابت", "خواب", "تغذیه", "رژیم", "مغز", "طول عمر",
+        "ورزش", "استرس", "پوست", "ویتامین", "درمان", "کشف", "جدید", "پزشک"
+      ];
+      hotKeywords.forEach(kw => { if (text.includes(kw)) score += 16; });
+      if (Array.isArray(item.content)) score += item.content.length * 4;
+      if (item.image && !item.image.includes("unsplash.com")) score += 25;
+      return score + ((item.news_id || 1000) * 0.05);
+    }
 
     async function loadNews(manual = false) {
       const container = document.getElementById('app-content');
       const t = UI_TEXT[currentLang];
       if (manual) showToast(t.syncing);
       try {
-        let res = await fetch(`${CDN_JSON_URL}?t=${Date.now()}`);
+        const cacheBuster = manual ? Date.now() : Math.floor(Date.now() / 60000);
+        let res = await fetch(`${CDN_JSON_URL}?t=${cacheBuster}`);
         if (!res.ok) res = await fetch(`${FALLBACK_JSON_URL}?t=${Date.now()}`);
         if (!res.ok) res = await fetch(`./news.json?t=${Date.now()}`);
         if (!res.ok) throw new Error();
-        allNews = await res.json();
+        const raw = await res.json();
+        allNews = raw.map((item, idx) => ({
+          ...item,
+          news_id: item.news_id || (1000 + raw.length - idx),
+          category: item.category || 'medical'
+        }));
+        if (currentLang === 'en') await ensureEnglishTranslations();
         render();
-        if (manual) showToast('مقالات بروز شد');
-      } catch(e) {
-        container.innerHTML = `<div class="status">خطا در بارگذاری مقالات. لطفا دوباره تلاش کنید.</div>`;
+        if (manual) showToast(t.updatedToast);
+      } catch (e) {
+        container.innerHTML = `<div class="status">${t.syncing}</div>`;
       }
     }
 
     function render() {
       const container = document.getElementById('app-content');
+      const t = UI_TEXT[currentLang];
       const q = document.getElementById('search').value.trim().toLowerCase();
+
       let list = allNews.filter(n => {
         const matchCat = currentFilter === 'ALL' || n.category === currentFilter;
-        const matchQ = !q || getItemTitle(n).toLowerCase().includes(q) || (n.summary || '').toLowerCase().includes(q);
+        const titleText = getItemTitle(n).toLowerCase();
+        const bodyText = getItemParagraphs(n).join(' ').toLowerCase();
+        const matchQ = !q || titleText.includes(q) || bodyText.includes(q);
         return matchCat && matchQ;
       });
 
-      if (currentSort === 'NEWEST') list.sort((a,b) => b.news_id - a.news_id);
-      else if (currentSort === 'OLDEST') list.sort((a,b) => a.news_id - b.news_id);
-      else if (currentSort === 'SAVED_FIRST') list.sort((a,b) => Number(isBookmarked(b)) - Number(isBookmarked(a)) || (b.news_id - a.news_id));
+      if (currentSort === 'NEWEST') list.sort((a, b) => (b.news_id || 0) - (a.news_id || 0));
+      else if (currentSort === 'OLDEST') list.sort((a, b) => (a.news_id || 0) - (b.news_id || 0));
+      else if (currentSort === 'SAVED_FIRST') list.sort((a, b) => Number(isBookmarked(b)) - Number(isBookmarked(a)) || (b.news_id - a.news_id));
 
       if (!list.length) {
-        container.innerHTML = `<div class="status">${UI_TEXT[currentLang].emptyFeed}</div>`;
+        container.innerHTML = `<div class="status">${t.emptyFeed}</div>`;
         return;
       }
 
-      const hero = list[0];
-      const rest = list.slice(1);
-      const t = UI_TEXT[currentLang];
-      const heroSaved = isBookmarked(hero);
+      const scored = [...list].sort((a, b) => computeHotScore(b) - computeHotScore(a));
+      hotHeroList = scored.slice(0, Math.min(5, scored.length));
+      if (currentHeroIndex >= hotHeroList.length) currentHeroIndex = 0;
+
+      const hotIds = new Set(hotHeroList.map(h => h.news_id));
+      window.currentRemainingList = list.filter(n => !hotIds.has(n.news_id));
+      if (!window.currentRemainingList.length) {
+        window.currentRemainingList = list.slice(1);
+      }
 
       container.innerHTML = `
-        <div class="hero-slider">
-          <div class="hero-slide-inner" onclick="openArticleById(${hero.news_id})">
-            <button class="bookmark-Quick ${heroSaved ? 'saved' : ''}" onclick="toggleBookmarkById(${hero.news_id}, event)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="${heroSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            </button>
-            <img src="${hero.image}" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80'" />
-            <div class="hero-overlay">
-              <div class="hot-tag-row"><span class="hot-badge">${t.hotBadge}</span><span class="news-code-badge">${t.newsCode} ${hero.news_id}</span></div>
-              <h2 class="hero-title">${getItemTitle(hero)}</h2>
-              <div class="hero-date">${formatNewsDate(hero.timestamp)}</div>
+        <div class="hero-slider" id="hero-slider"></div>
+        <div class="news-list" id="news-list-box"></div>
+      `;
+
+      setupHeroTouchEvents();
+      renderHeroSlide();
+      renderListOnly();
+    }
+
+    function renderHeroSlide() {
+      const slider = document.getElementById('hero-slider');
+      if (!slider || !hotHeroList.length) return;
+      const t = UI_TEXT[currentLang];
+      const hero = hotHeroList[currentHeroIndex];
+      const heroSaved = isBookmarked(hero);
+
+      const dotsHtml = hotHeroList.map((_, idx) =>
+        `<span class="dot ${idx === currentHeroIndex ? 'active' : ''}" onclick="goToHeroSlide(${idx}, event)"></span>`
+      ).join('');
+
+      slider.innerHTML = `
+        <div class="hero-slide-inner" onclick="openArticleById(${hero.news_id})">
+          <button class="bookmark-Quick ${heroSaved ? 'saved' : ''}" onclick="toggleBookmarkById(${hero.news_id}, event)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="${heroSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+          <img src="${hero.image}" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80'" />
+          <div class="hero-overlay">
+            <div class="hot-tag-row">
+              <span class="hot-badge">${t.hotBadge} (${currentHeroIndex + 1}/${hotHeroList.length})</span>
+              <span class="news-code-badge">${t.newsCode} ${hero.news_id}</span>
             </div>
+            <h2 class="hero-title">${getItemTitle(hero)}</h2>
+            <div class="hero-date">${formatNewsDate(hero.timestamp)}</div>
           </div>
-        </div>
-        <div class="news-list">
-          ${rest.map(item => {
-            const saved = isBookmarked(item);
-            return `
-              <div class="news-item" onclick="openArticleById(${item.news_id})">
-                <img class="thumb" src="${item.image}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&q=80'" />
-                <div class="item-content">
-                  <div class="item-top-bar">
-                    <span class="item-code">${t.newsCode} ${item.news_id}</span>
-                    <button class="item-bookmark ${saved ? 'saved' : ''}" onclick="toggleBookmarkById(${item.news_id}, event)">
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="${saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                    </button>
-                  </div>
-                  <h3 class="item-title">${getItemTitle(item)}</h3>
-                  <div class="item-date">${formatNewsDate(item.timestamp)}</div>
-                </div>
-              </div>
-            `;
-          }).join('')}
+          <div class="slider-dots">${dotsHtml}</div>
         </div>
       `;
     }
 
-    function openArticleById(newsId) {
+    function goToHeroSlide(idx, ev) {
+      if (ev) ev.stopPropagation();
+      currentHeroIndex = idx;
+      renderHeroSlide();
+    }
+
+    function nextHeroSlide() {
+      if (hotHeroList.length <= 1) return;
+      currentHeroIndex = (currentHeroIndex + 1) % hotHeroList.length;
+      renderHeroSlide();
+    }
+
+    function prevHeroSlide() {
+      if (hotHeroList.length <= 1) return;
+      currentHeroIndex = (currentHeroIndex - 1 + hotHeroList.length) % hotHeroList.length;
+      renderHeroSlide();
+    }
+
+    function setupHeroTouchEvents() {
+      const slider = document.getElementById('hero-slider');
+      if (!slider) return;
+      slider.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      slider.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchEndX - touchStartX;
+        if (Math.abs(diff) > 38) {
+          if (diff < 0) nextHeroSlide();
+          else prevHeroSlide();
+        }
+      }, { passive: true });
+    }
+
+    function renderListOnly() {
+      const listBox = document.getElementById('news-list-box');
+      if (!listBox) return;
+      const t = UI_TEXT[currentLang];
+      const rest = window.currentRemainingList || [];
+
+      listBox.innerHTML = rest.map(item => {
+        const saved = isBookmarked(item);
+        return `
+          <div class="news-item" onclick="openArticleById(${item.news_id})">
+            <img class="thumb" src="${item.image}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&q=80'" />
+            <div class="item-content">
+              <div class="item-top-bar">
+                <span class="item-code">${t.newsCode} ${item.news_id}</span>
+                <button class="item-bookmark ${saved ? 'saved' : ''}" onclick="toggleBookmarkById(${item.news_id}, event)">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="${saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </button>
+              </div>
+              <h3 class="item-title">${getItemTitle(item)}</h3>
+              <div class="item-date">${formatNewsDate(item.timestamp)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function openArticleById(newsId) {
       const item = allNews.find(n => String(n.news_id) === String(newsId)) || savedMap[String(newsId)];
       if (!item) return;
       window.currentOpenArticle = item;
       const t = UI_TEXT[currentLang];
+
+      if (currentLang === 'en' && (!item.content_en || !item.content_en.length)) {
+        const rawFa = Array.isArray(item.content) && item.content.length ? item.content.join('\n\n') : (item.summary || '');
+        const trBody = await translateOnTheFly(rawFa, 'fa', 'en');
+        item.content_en = trBody.split('\n').map(p => p.trim()).filter(Boolean);
+        if (!item.title_en) item.title_en = await translateOnTheFly(item.title, 'fa', 'en');
+      }
+
       const paragraphs = getItemParagraphs(item);
+      const leadText = paragraphs[0] || '';
+      const bodyParagraphs = paragraphs.slice(1);
+      const bodyHtml = (bodyParagraphs.length ? bodyParagraphs : [leadText])
+        .map(p => `<p class="article-paragraph">${p}</p>`).join('');
 
       document.getElementById('article-content').innerHTML = `
         <img class="article-hero-img" src="${item.image}" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80'" />
         <div class="article-body">
-          <div class="article-meta-row"><span class="news-code-badge">${t.newsCode} ${item.news_id}</span><span>${formatNewsDate(item.timestamp)}</span></div>
+          <div class="article-meta-row">
+            <span class="news-code-badge" style="margin:0">${t.newsCode} ${item.news_id}</span>
+            <span>${formatNewsDate(item.timestamp)}</span>
+          </div>
           <h1 class="article-headline">${getItemTitle(item)}</h1>
-          <div class="article-lead">${paragraphs[0] || ''}</div>
-          ${paragraphs.slice(1).map(p => `<p class="article-paragraph">${p}</p>`).join('')}
+          <div class="article-lead">${leadText}</div>
+          ${bodyHtml}
         </div>
       `;
 
@@ -605,7 +1022,9 @@
       const t = UI_TEXT[currentLang];
       const paragraphs = getItemParagraphs(item);
       const title = getItemTitle(item);
-      const shareText = currentLang === 'fa' ? `🌿 ${title}\n\n${paragraphs[0]}\n\n💚 مطلب شماره ${item.news_id} در اپلیکیشن Health Plus` : `🌿 ${title}\n\n${paragraphs[0]}\n\n💚 Article #${item.news_id} on Health Plus`;
+      const shareText = currentLang === 'fa'
+        ? `🩺 ${title}\n\n${paragraphs[0]}\n\n💚 خبر شماره ${item.news_id} در اپلیکیشن Health News`
+        : `🩺 ${title}\n\n${paragraphs[0]}\n\n💚 News #${item.news_id} on Health News App`;
 
       if (navigator.share) {
         navigator.share({ title, text: shareText }).catch(() => {});
@@ -645,13 +1064,19 @@
     function renderSavedDrawer() {
       const box = document.getElementById('saved-list');
       const t = UI_TEXT[currentLang];
-      const list = Object.values(savedMap).sort((a,b) => b.news_id - a.news_id);
-      if (!list.length) { box.innerHTML = `<div class="status">${t.emptySaved}</div>`; return; }
+      const list = Object.values(savedMap).sort((a, b) => (b.news_id || 0) - (a.news_id || 0));
+      if (!list.length) {
+        box.innerHTML = `<div class="status">${t.emptySaved}</div>`;
+        return;
+      }
       box.innerHTML = `<div class="news-list">` + list.map(item => `
         <div class="news-item" onclick="closeDrawer(); openArticleById(${item.news_id})">
           <img class="thumb" src="${item.image}" style="width:72px;height:68px" onerror="this.src='https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&q=80'" />
           <div class="item-content">
-            <div class="item-top-bar"><span class="item-code">${t.newsCode} ${item.news_id}</span><button class="item-bookmark saved" style="color:#dc2626" onclick="toggleBookmarkById(${item.news_id}, event)">✕</button></div>
+            <div class="item-top-bar">
+              <span class="item-code">${t.newsCode} ${item.news_id}</span>
+              <button class="item-bookmark saved" style="color:#dc2626;font-weight:900" onclick="toggleBookmarkById(${item.news_id}, event)">✕</button>
+            </div>
             <h3 class="item-title" style="font-size:0.82rem">${getItemTitle(item)}</h3>
           </div>
         </div>
@@ -662,26 +1087,63 @@
       const t = UI_TEXT[currentLang];
       const box = document.getElementById('sheet-box');
       box.innerHTML = `<div class="sheet-title">${t.filterModalTitle}</div><div class="option-list">` +
-        Object.entries(t.filters).map(([k, label]) => `<div class="option-item ${currentFilter === k ? 'selected' : ''}" onclick="setFilter('${k}')"><span>${label}</span><span>${currentFilter === k ? '✓' : ''}</span></div>`).join('') + `</div>`;
+        Object.entries(t.filters).map(([k, label]) => `
+          <div class="option-item ${currentFilter === k ? 'selected' : ''}" onclick="setFilter('${k}')">
+            <span>${label}</span><span>${currentFilter === k ? '✓' : ''}</span>
+          </div>
+        `).join('') + `</div>`;
       document.getElementById('sheet-backdrop').classList.add('open');
     }
 
-    function setFilter(k) { currentFilter = k; document.getElementById('filter-label').textContent = `${UI_TEXT[currentLang].filterPrefix}: ${UI_TEXT[currentLang].filters[k]}`; closeSheet(); render(); }
+    function setFilter(k) {
+      currentFilter = k;
+      currentHeroIndex = 0;
+      const t = UI_TEXT[currentLang];
+      document.getElementById('filter-label').textContent = `${t.filterPrefix}: ${t.filters[k]}`;
+      closeSheet();
+      render();
+    }
 
     function openSortSheet() {
       const t = UI_TEXT[currentLang];
       const box = document.getElementById('sheet-box');
       box.innerHTML = `<div class="sheet-title">${t.sortModalTitle}</div><div class="option-list">` +
-        Object.entries(t.sorts).map(([k, label]) => `<div class="option-item ${currentSort === k ? 'selected' : ''}" onclick="setSort('${k}')"><span>${label}</span><span>${currentSort === k ? '✓' : ''}</span></div>`).join('') + `</div>`;
+        Object.entries(t.sorts).map(([k, label]) => `
+          <div class="option-item ${currentSort === k ? 'selected' : ''}" onclick="setSort('${k}')">
+            <span>${label}</span><span>${currentSort === k ? '✓' : ''}</span>
+          </div>
+        `).join('') + `</div>`;
       document.getElementById('sheet-backdrop').classList.add('open');
     }
 
-    function setSort(k) { currentSort = k; document.getElementById('sort-label').textContent = `${UI_TEXT[currentLang].sortPrefix}: ${UI_TEXT[currentLang].sorts[k]}`; closeSheet(); render(); }
+    function setSort(k) {
+      currentSort = k;
+      const t = UI_TEXT[currentLang];
+      document.getElementById('sort-label').textContent = `${t.sortPrefix}: ${t.sorts[k]}`;
+      closeSheet();
+      render();
+    }
 
     function openInfoModal(type) {
       closeDrawer();
       const box = document.getElementById('sheet-box');
-      box.innerHTML = `<div class="sheet-title">${type==='about'?'درباره ما':type==='rules'?'قوانین و حریم خصوصی':'تماس با ما'}</div><p class="article-paragraph" style="font-size:0.86rem">${type==='about'?'اپلیکیشن Health Plus مرجع تخصصی مقالات سلامت، تندرستی و سبک زندگی سالم است.':type==='rules'?'این برنامه اطلاعات شخصی ذخیره نمی‌کند.':'پشتیبانی: healthplus.app@gmail.com'}</p>`;
+      if (currentLang === 'en') {
+        if (type === 'about') {
+          box.innerHTML = `<div class="sheet-title">About Us</div><p class="article-paragraph" style="font-size:0.86rem"><strong>Health News</strong> delivers trusted, real-time global medical, nutrition, fitness, and healthy lifestyle news in a fast bilingual interface.</p>`;
+        } else if (type === 'rules') {
+          box.innerHTML = `<div class="sheet-title">Terms & Privacy Policy</div><p class="article-paragraph" style="font-size:0.86rem">1. Health News content is for informational purposes only and does not replace professional medical advice.<br><br>2. No personal user data is collected; bookmarks stay locally on your device.</p>`;
+        } else {
+          box.innerHTML = `<div class="sheet-title">Contact Us</div><p class="article-paragraph" style="font-size:0.86rem">Support & Inquiries:<br><br><strong style="color:var(--cyan-light)">healthnews.app@gmail.com</strong></p>`;
+        }
+      } else {
+        if (type === 'about') {
+          box.innerHTML = `<div class="sheet-title">درباره ما</div><p class="article-paragraph" style="font-size:0.86rem">اپلیکیشن <strong>Health News</strong> مرجع تخصصی پوشش لحظه‌ای اخبار پزشکی، تغذیه سالم، سلامت روان، تناسب اندام و سبک زندگی سالم از معتبرترین منابع علمی جهان است.</p>`;
+        } else if (type === 'rules') {
+          box.innerHTML = `<div class="sheet-title">قوانین و حریم خصوصی</div><p class="article-paragraph" style="font-size:0.86rem">۱. مطالب منتشرشده در Health News صرفاً جنبه اطلاع‌رسانی عمومی دارد و جایگزین مشاوره پزشک متخصص نیست.<br><br>۲. هیچ‌گونه اطلاعات شخصی از کاربران ذخیره نمی‌شود و مطالب نشان‌شده تنها در حافظه دستگاه شما باقی می‌ماند.</p>`;
+        } else {
+          box.innerHTML = `<div class="sheet-title">تماس با ما</div><p class="article-paragraph" style="font-size:0.86rem">برای ارسال پیشنهادات و ارتباط با تیم پشتیبانی:<br><br><strong style="color:var(--cyan-light)">healthnews.app@gmail.com</strong></p>`;
+        }
+      }
       document.getElementById('sheet-backdrop').classList.add('open');
     }
 
