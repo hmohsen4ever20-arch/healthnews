@@ -26,5 +26,5 @@ jobs:
           if ! git diff --staged --quiet; then
             git commit -m "Auto-update health news"
             git push
-            curl -s "https://purge.jsdelivr.net/gh/frankalayari-beep/healthnews@main/news.json" || true
+            curl -s "https://purge.jsdelivr.net/gh/hmohsen4ever20-arch/healthnews@main/news.json" || true
           fi
