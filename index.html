@@ -416,7 +416,7 @@
       <input type="text" id="search" class="search-input" placeholder="جستجو در اخبار و مقالات سلامت..." />
     </div>
 
-    <!-- نوار ابزار: فیلتر + مرتب‌سازی (با آیکون دقیق و منظم) + بروزرسانی -->
+    <!-- نوار ابزار: فیلتر + مرتب‌سازی + بروزرسانی -->
     <div class="toolbar">
       <button class="tool-btn" id="filter-btn" onclick="openFilterSheet()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -505,9 +505,11 @@
   </div>
 
   <script>
-    const GITHUB_REPO = "frankalayari-beep/healthnews";
+    const GITHUB_REPO = "hmohsen4ever20-arch/healthnews";
     const CDN_JSON_URL = `https://cdn.jsdelivr.net/gh/${GITHUB_REPO}@main/news.json`;
+    const FASTLY_CDN_URL = `https://fastly.jsdelivr.net/gh/${GITHUB_REPO}@main/news.json`;
     const FALLBACK_JSON_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/news.json`;
+    const PAGES_JSON_URL = `https://hmohsen4ever20-arch.github.io/healthnews/news.json`;
     const ADSTERRA_URL = "https://asiafilm.org/4/052064ca4ffd0916d363a8d4ca962a64";
 
     let allNews = [];
@@ -605,7 +607,6 @@
         if (ctx.state === 'suspended') ctx.resume();
 
         const now = ctx.currentTime;
-        // آکورد آرامش‌بخش ماژور ۹ (C5 - E5 - G5 - B5 - C6)
         const notes = [523.25, 659.25, 783.99, 987.77, 1046.50];
 
         notes.forEach((freq, i) => {
@@ -764,7 +765,7 @@
       document.getElementById('ad-iframe').src = 'about:blank';
       if (isFirstStartupAd) {
         isFirstStartupAd = false;
-        playWelcomeChime(); // پخش نوای خوش‌آمدگویی بلافاصله هنگام شروع نمایش اولیه
+        playWelcomeChime();
         playSplash();
       }
     }
@@ -816,103 +817,99 @@
       if (item.image && !item.image.includes("unsplash.com")) score += 25;
       return score + ((item.news_id || 1000) * 0.05);
     }
-    const PAGES_JSON_URL = `https://frankalayari-beep.github.io/healthnews/news.json`;
-    let isLoadingNews = false;
-
-    async function fetchJsonWithTimeout(url, ms = 7000) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), ms);
-      try {
-        const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
-        if (!res.ok) return null;
-        const data = await res.json();
-        return Array.isArray(data) && data.length > 0 ? data : null;
-      } catch (e) {
-        return null;
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
     function getMaxNewsId(list) {
       if (!Array.isArray(list) || !list.length) return 0;
       return Math.max(...list.map(item => Number(item.news_id) || 0));
     }
 
+    async function fetchSimpleJson(url) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return Array.isArray(data) && data.length > 0 ? data : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function applyNewsData(raw) {
+      allNews = raw.map((item, idx) => ({
+        ...item,
+        news_id: item.news_id || (1000 + raw.length - idx),
+        category: item.category || 'medical'
+      }));
+      try {
+        localStorage.setItem('hn_cached_news', JSON.stringify(allNews));
+      } catch (e) {}
+      if (currentLang === 'en') {
+        await ensureEnglishTranslations();
+      }
+      render();
+    }
+
+    let activeLoadSeq = 0;
+
     async function loadNews(manual = false) {
-      if (isLoadingNews) return;
-      isLoadingNews = true;
+      const seq = ++activeLoadSeq;
       const container = document.getElementById('app-content');
       const t = UI_TEXT[currentLang];
       if (manual) showToast(t.syncing);
 
-      try {
-        const bust = `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-        const onlineSources = [
-          `${FALLBACK_JSON_URL}?t=${bust}`,
-          `${PAGES_JSON_URL}?t=${bust}`,
-          `${CDN_JSON_URL}?t=${bust}`
-        ];
+      const bust = `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      const onlineSources = [
+        `${CDN_JSON_URL}?t=${bust}`,
+        `${FASTLY_CDN_URL}?t=${bust}`,
+        `${FALLBACK_JSON_URL}?t=${bust}`,
+        `${PAGES_JSON_URL}?t=${bust}`
+      ];
 
-        let raw = null;
-        let fetchedOnline = false;
+      let gotAnyOnline = false;
+      let bestMaxId = getMaxNewsId(allNews);
+      let toastedSuccess = false;
 
-        for (const url of onlineSources) {
-          const data = await fetchJsonWithTimeout(url, 7000);
-          if (data) {
-            raw = data;
-            fetchedOnline = true;
-            break;
+      const tasks = onlineSources.map(url =>
+        fetchSimpleJson(url).then(async data => {
+          if (!data || seq !== activeLoadSeq) return;
+          const incomingMaxId = getMaxNewsId(data);
+          if (!gotAnyOnline || incomingMaxId > bestMaxId) {
+            gotAnyOnline = true;
+            bestMaxId = Math.max(bestMaxId, incomingMaxId);
+            await applyNewsData(data);
+            if (manual && !toastedSuccess) {
+              toastedSuccess = true;
+              showToast(t.updatedToast);
+            }
           }
-        }
+        })
+      );
 
-        if (fetchedOnline && raw) {
-          try {
-            localStorage.setItem('hn_cached_news', JSON.stringify(raw));
-          } catch (e) {}
+      await Promise.all(tasks);
+      if (seq !== activeLoadSeq) return;
+
+      if (!gotAnyOnline) {
+        let cached = null;
+        try {
+          const c = JSON.parse(localStorage.getItem('hn_cached_news') || 'null');
+          if (Array.isArray(c) && c.length > 0) cached = c;
+        } catch (e) {}
+
+        const localBundled = await fetchSimpleJson(`./news.json?t=${bust}`);
+        let fallbackRaw = null;
+        if (cached && localBundled) {
+          fallbackRaw = getMaxNewsId(cached) >= getMaxNewsId(localBundled) ? cached : localBundled;
         } else {
-          // اگر هیچ منبع آنلاینی در دسترس نبود، از حافظه ذخیره شده یا فایل داخلی اپ استفاده کن
-          let cached = null;
-          try {
-            const c = JSON.parse(localStorage.getItem('hn_cached_news') || 'null');
-            if (Array.isArray(c) && c.length > 0) cached = c;
-          } catch (e) {}
-
-          const localBundled = await fetchJsonWithTimeout(`./news.json?t=${bust}`, 5000);
-
-          if (cached && localBundled) {
-            raw = getMaxNewsId(cached) >= getMaxNewsId(localBundled) ? cached : localBundled;
-          } else {
-            raw = cached || localBundled;
-          }
+          fallbackRaw = cached || localBundled;
         }
 
-        if (!raw) {
-          if (!allNews.length) {
-            container.innerHTML = `<div class="status">${currentLang === 'fa' ? 'خطا در دریافت اخبار. لطفاً اینترنت خود را بررسی کرده و دکمه بروزرسانی را بزنید.' : 'Failed to load news. Please check your internet and tap refresh.'}</div>`;
-          } else if (manual) {
-            showToast(currentLang === 'fa' ? 'عدم دسترسی به اینترنت؛ آخرین اخبار ذخیره شده نمایش داده می‌شود' : 'Offline: showing cached news');
-          }
-          return;
-        }
-
-        allNews = raw.map((item, idx) => ({
-          ...item,
-          news_id: item.news_id || (1000 + raw.length - idx),
-          category: item.category || 'medical'
-        }));
-        if (currentLang === 'en') await ensureEnglishTranslations();
-        render();
-
-        if (manual) {
-          if (fetchedOnline) {
-            showToast(t.updatedToast);
-          } else {
+        if (fallbackRaw) {
+          await applyNewsData(fallbackRaw);
+          if (manual) {
             showToast(currentLang === 'fa' ? 'اتصال به سرور برقرار نشد؛ نسخه آفلاین نمایش داده شد' : 'Could not reach server; showing offline news');
           }
+        } else if (!allNews.length) {
+          container.innerHTML = `<div class="status">${currentLang === 'fa' ? 'خطا در دریافت اخبار. لطفاً اینترنت خود را بررسی کرده و دکمه بروزرسانی را بزنید.' : 'Failed to load news. Please check your internet and tap refresh.'}</div>`;
         }
-      } finally {
-        isLoadingNews = false;
       }
     }
 
